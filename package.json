@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "axios": "^0.20.0",
+    "command-line-args": "^5.1.1"
+  }
+}
