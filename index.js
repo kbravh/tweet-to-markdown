@@ -82,18 +82,30 @@ const buildMarkdown = tweet => {
 
   let text = tweet.data.text
   // replace entities with markdown links
-  if(tweet.data.entities) {
+  if (tweet.data.entities) {
     // replace any mentions with links
-    // first, add the @ before any mentions
     let mentions = []
-    tweet.data.entities.mentions && tweet.data.entities.mentions.forEach((mention, index) => {
+    // first, add the @ before any mentions
+    tweet.data.entities.mentions && tweet.data.entities.mentions.forEach(mention => {
       mentions.push(mention.username)
-      text = text.substring(0, mention.start) + `@${mention.username}` + text.substring(mention.end+1)
+      text = text.substring(0, mention.start) + `@${mention.username}` + text.substring(mention.end + 1)
     })
     // then, replace all @s with their hyperlinks
     for (const mention of mentions) {
       text = text.replace(`@${mention}`, ` [@${mention}](https://twitter.com/${mention})`)
     }
+    // replace any hashtags with links
+    let hashtags = []
+    // first, add the # before any hashtags
+    tweet.data.entities.hashtags && tweet.data.entities.hashtags.forEach(hashtag => {
+      hashtags.push(hashtag.tag)
+      text = text.substring(0, hashtag.start) + `#${hashtag.tag}` + text.substring(hashtag.end + 1)
+    })
+    // then, replace all #s with their hyperlinks
+    for (const hashtag of hashtags) {
+      text = text.replace(`#${hashtag}`, ` [#${hashtag}](https://twitter.com/hashtag/${hashtag}) `)
+    }
+
     // replace hyperlinks with markdown links
     tweet.data.entities.urls && tweet.data.entities.urls.forEach(url => {
       text = text.replace(url.url, `[${url.display_url}](${url.expanded_url})`)
@@ -138,7 +150,7 @@ const createPollTable = polls => {
     return table.concat(options).join('\n')
   })
 }
-
+// Creates markdown image links
 const createMediaElements = media => {
   return media.map(medium => {
     switch (medium.type) {
@@ -201,6 +213,7 @@ const testPath = async path => {
 
 const main = async () => {
   let tweet = await getTweet(id)
+  console.log(JSON.stringify(tweet, null, 2))
   let markdown = buildMarkdown(tweet)
   writeTweet(tweet, markdown)
 }
