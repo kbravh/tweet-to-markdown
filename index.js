@@ -2,7 +2,9 @@
 
 const { default: Axios } = require("axios")
 const commandLineArgs = require(`command-line-args`)
-const fs = require(`fs`).promises
+const fs = require(`fs`)
+const fsp = fs.promises
+const path = require(`path`)
 
 const errorMessage = message => {
   console.error(message)
@@ -11,7 +13,8 @@ const errorMessage = message => {
 
 const optionDefinitions = [
   { name: `src`, defaultOption: true },
-  { name: `bearer`, alias: `b` }
+  { name: `bearer`, alias: `b` },
+  { name: `path`, alias: `p`}
 ]
 
 const options = commandLineArgs(optionDefinitions)
@@ -113,11 +116,29 @@ const createMediaElements = media => {
 
 // Write tweet text to file
 const writeTweet = async (tweet, markdown) => {
+  let filepath = ''
+  // check if path provided by user is valid and writeable
+  if(options.path){
+    testPath(options.path)
+    filepath = options.path
+  }
+
   let filename = `${tweet.includes.users[0].username} - ${tweet.data.id}.md`
-  await fs.writeFile(filename, markdown, error => {
-    if (error) throw error
-    console.log(`Tweet saved to ${filename}`)
+  filepath = path.format({dir: filepath, base: filename})
+
+  await fsp.writeFile(filepath, markdown).catch(error => {
+    errorMessage(error)
   })
+  console.log(`Tweet saved to ${filepath}`)
+}
+
+const testPath = async path => {
+  await fsp.access(path, fs.constants.F_OK | fs.constants.W_OK)
+    .catch(error => {
+      errorMessage(`${path} ${error.code === 'ENOENT' ? 'does not exist' : 'is read-only.'}`)
+    })
+  // if we made it past the check, return true
+  return true
 }
 
 const main = async () => {
