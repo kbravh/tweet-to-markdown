@@ -16,7 +16,8 @@ const optionDefinitions = [
   { name: `bearer`, alias: `b` },
   { name: `path`, alias: `p` },
   { name: `force`, alias: `f`, type: Boolean },
-  { name: `filename`}
+  { name: `filename` },
+  { name: `metrics`, alias: `m`, type: Boolean }
 ]
 
 const options = commandLineArgs(optionDefinitions)
@@ -47,7 +48,7 @@ const getTweet = async id => {
   let params = new URLSearchParams({
     "expansions": "author_id,attachments.poll_ids,attachments.media_keys",
     "user.fields": "name,username,profile_image_url",
-    "tweet.fields": "attachments",
+    "tweet.fields": "attachments,public_metrics",
     "media.fields": "url",
     "poll.fields": "options"
   })
@@ -70,18 +71,28 @@ const getTweet = async id => {
 }
 
 const buildMarkdown = tweet => {
+  let metrics = []
+  if (options.metrics) {
+    metrics = [
+      `likes: ${tweet.data.public_metrics.like_count}`,
+      `retweets: ${tweet.data.public_metrics.retweet_count}`,
+      `replies: ${tweet.data.public_metrics.reply_count}`
+    ]
+  }
+
   let frontmatter = [
     `---`,
     `author: ${tweet.includes.users[0].name}`,
     `handle: @${tweet.includes.users[0].username}`,
+    ...metrics,
     `---`
   ]
 
   let markdown = [
     `![${tweet.includes.users[0].username}](${tweet.includes.users[0].profile_image_url})`, // profile image
-    `${tweet.includes.users[0].name} (@${tweet.includes.users[0].username})`,
+    `${tweet.includes.users[0].name} (@${tweet.includes.users[0].username})`, // name and handle
     `\n`,
-    `${tweet.data.text}`
+    `${tweet.data.text}` // text of the tweet
   ]
 
   // Add in other tweet elements
@@ -147,7 +158,7 @@ const writeTweet = async (tweet, markdown) => {
 }
 
 const createFilename = tweet => {
-  if (options.filename){
+  if (options.filename) {
     let filename = `${options.filename}.md`
     filename = filename.replace("{{name}}", tweet.includes.users[0].name)
     filename = filename.replace("{{handle}}", tweet.includes.users[0].username)
