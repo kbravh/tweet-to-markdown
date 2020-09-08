@@ -40,8 +40,10 @@ try {
 const getTweet = async id => {
   let twitterUrl = new URL(`https://api.twitter.com/2/tweets/${id}`)
   let params = new URLSearchParams({
-    "expansions": "author_id,attachments.poll_ids",
+    "expansions": "author_id,attachments.poll_ids,attachments.media_keys",
     "user.fields": "name,username,profile_image_url",
+    "tweet.fields": "attachments",
+    "media.fields": "url",
     "poll.fields": "options"
   })
 
@@ -82,6 +84,10 @@ const buildMarkdown = tweet => {
     markdown = markdown.concat(createPollTable(tweet.includes.polls))
   }
 
+  if (tweet.includes.media) {
+    markdown = markdown.concat(createMediaElements(tweet.includes.media))
+  }
+
   return frontmatter.concat(markdown).join('\n')
 }
 
@@ -91,6 +97,17 @@ const createPollTable = polls => {
     let table = ['|Option|Votes|', `|---|:---:|`]
     let options = poll.options.map(option => `|${option.label}|${option.votes}|`)
     return table.concat(options).join('\n')
+  })
+}
+
+const createMediaElements = media => {
+  return media.map(medium => {
+    switch(medium.type){
+      case "photo":
+        return `![${medium.media_key}](${medium.url})`
+      default: 
+        break
+    }
   })
 }
 
