@@ -15,7 +15,8 @@ const optionDefinitions = [
   { name: `src`, defaultOption: true },
   { name: `bearer`, alias: `b` },
   { name: `path`, alias: `p` },
-  { name: `force`, alias: `f`, type: Boolean }
+  { name: `force`, alias: `f`, type: Boolean },
+  { name: `filename`}
 ]
 
 const options = commandLineArgs(optionDefinitions)
@@ -125,7 +126,7 @@ const writeTweet = async (tweet, markdown) => {
   }
 
   // create filename
-  let filename = `${tweet.includes.users[0].username} - ${tweet.data.id}.md`
+  let filename = createFilename(tweet)
   // combine name and path
   filepath = path.format({ dir: filepath, base: filename })
 
@@ -143,6 +144,17 @@ const writeTweet = async (tweet, markdown) => {
     errorMessage(error)
   })
   console.log(`Tweet saved to ${filepath}`)
+}
+
+const createFilename = tweet => {
+  if (options.filename){
+    let filename = `${options.filename}.md`
+    filename = filename.replace("{{name}}", tweet.includes.users[0].name)
+    filename = filename.replace("{{handle}}", tweet.includes.users[0].username)
+    filename = filename.replace("{{id}}", tweet.data.id)
+    return filename
+  }
+  return `${tweet.includes.users[0].username} - ${tweet.data.id}.md`
 }
 
 // Test if the path exists or is read only
