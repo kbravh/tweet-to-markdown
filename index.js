@@ -23,7 +23,7 @@ if (!options.src) {
 let bearer = options.bearer || process.env.TWITTER_BEARER_TOKEN
 
 if (!bearer) {
-  errorMessage(`No authorization provided. You must provide your bearer token with -h or set it as the environment variable TWITTER_BEARER_TOKEN.`)
+  errorMessage(`No authorization provided. You must provide your bearer token.`)
 }
 
 let id
@@ -38,9 +38,15 @@ try {
 
 // fetch tweet from Twitter API
 const getTweet = async id => {
+  let twitterUrl = new URL(`https://api.twitter.com/2/tweets/${id}`)
+  let params = new URLSearchParams({
+    "expansions": "author_id",
+    "user.fields": "name,username,profile_image_url"
+  })
+
   return await Axios({
     method: `GET`,
-    url: `https://api.twitter.com/2/tweets/${id}`,
+    url: `${twitterUrl.href}?${params.toString()}`,
     headers: { 'Authorization': `Bearer ${bearer}` }
   })
     .then(response => response.data)
@@ -58,17 +64,37 @@ const getTweet = async id => {
     })
 }
 
+const buildMarkdown = tweet => {
+  let frontmatter = [
+    `---`,
+    `author: ${tweet.includes.users[0].name}`,
+    `handle: @${tweet.includes.users[0].username}`,
+    `---`
+  ]
+  
+  let markdown = [
+    `![${tweet.includes.users[0].username}](${tweet.includes.users[0].profile_image_url})`, // profile image
+    `${tweet.includes.users[0].name} (@${tweet.includes.users[0].username})`,
+    `\n`,
+    `${tweet.data.text}`
+  ]
+
+  return frontmatter.concat(markdown).join('\n')
+}
+
 // Write tweet text to file
-const writeTweet = async tweet => {
-  await fs.writeFile(`${tweet.data.id}.md`, tweet.data.text, error => {
+const writeTweet = async (tweet, markdown) => {
+  let filename = `${tweet.includes.users[0].username} - ${tweet.data.id}.md`
+  await fs.writeFile(filename, markdown, error => {
     if (error) throw error
-    console.log(`Tweet saved to ${tweet.data.id}.md`)
+    console.log(`Tweet saved to ${filename}`)
   })
 }
 
 const main = async () => {
   let tweet = await getTweet(id)
-  writeTweet(tweet)
+  let markdown = buildMarkdown(tweet)
+  writeTweet(tweet, markdown)
 }
 
 main()
