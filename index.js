@@ -48,7 +48,7 @@ const getTweet = async id => {
   let params = new URLSearchParams({
     "expansions": "author_id,attachments.poll_ids,attachments.media_keys",
     "user.fields": "name,username,profile_image_url",
-    "tweet.fields": "attachments,public_metrics",
+    "tweet.fields": "attachments,public_metrics,entities",
     "media.fields": "url",
     "poll.fields": "options"
   })
@@ -80,6 +80,26 @@ const buildMarkdown = tweet => {
     ]
   }
 
+  let text = tweet.data.text
+  // replace entities with markdown links
+  if(tweet.data.entities) {
+    // replace any mentions with links
+    // first, add the @ before any mentions
+    let mentions = []
+    tweet.data.entities.mentions && tweet.data.entities.mentions.forEach((mention, index) => {
+      mentions.push(mention.username)
+      text = text.substring(0, mention.start) + `@${mention.username}` + text.substring(mention.end+1)
+    })
+    // then, replace all @s with their hyperlinks
+    for (const mention of mentions) {
+      text = text.replace(`@${mention}`, ` [@${mention}](https://twitter.com/${mention})`)
+    }
+    // replace hyperlinks with markdown links
+    tweet.data.entities.urls && tweet.data.entities.urls.forEach(url => {
+      text = text.replace(url.url, `[${url.display_url}](${url.expanded_url})`)
+    })
+  }
+
   let frontmatter = [
     `---`,
     `author: ${tweet.includes.users[0].name}`,
@@ -90,9 +110,9 @@ const buildMarkdown = tweet => {
 
   let markdown = [
     `![${tweet.includes.users[0].username}](${tweet.includes.users[0].profile_image_url})`, // profile image
-    `${tweet.includes.users[0].name} (@${tweet.includes.users[0].username})`, // name and handle
+    `${tweet.includes.users[0].name} ([@${tweet.includes.users[0].username}](https://twitter.com/${tweet.includes.users[0].username}))`, // name and handle
     `\n`,
-    `${tweet.data.text}` // text of the tweet
+    `${text}` // text of the tweet
   ]
 
   // Add in other tweet elements
@@ -103,6 +123,9 @@ const buildMarkdown = tweet => {
   if (tweet.includes.media) {
     markdown = markdown.concat(createMediaElements(tweet.includes.media))
   }
+
+  // add extra lines for line breaks in markdown
+  markdown = markdown.map(line => line.replace(/\n/g, '\n\n'))
 
   return frontmatter.concat(markdown).join('\n')
 }
