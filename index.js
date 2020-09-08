@@ -40,8 +40,9 @@ try {
 const getTweet = async id => {
   let twitterUrl = new URL(`https://api.twitter.com/2/tweets/${id}`)
   let params = new URLSearchParams({
-    "expansions": "author_id",
-    "user.fields": "name,username,profile_image_url"
+    "expansions": "author_id,attachments.poll_ids",
+    "user.fields": "name,username,profile_image_url",
+    "poll.fields": "options"
   })
 
   return await Axios({
@@ -52,13 +53,10 @@ const getTweet = async id => {
     .then(response => response.data)
     .catch(error => {
       if (error.response) {
-        console.log(error.response)
         errorMessage(error.response.statusText)
       } else if (error.request) {
-        console.log(error.request)
         errorMessage(`There seems to be a connection issue.`)
       } else {
-        console.error(JSON.stringify(error, null, 2))
         errorMessage(`An error occurred.`)
       }
     })
@@ -71,7 +69,7 @@ const buildMarkdown = tweet => {
     `handle: @${tweet.includes.users[0].username}`,
     `---`
   ]
-  
+
   let markdown = [
     `![${tweet.includes.users[0].username}](${tweet.includes.users[0].profile_image_url})`, // profile image
     `${tweet.includes.users[0].name} (@${tweet.includes.users[0].username})`,
@@ -79,7 +77,21 @@ const buildMarkdown = tweet => {
     `${tweet.data.text}`
   ]
 
+  // Add in other tweet elements
+  if (tweet.includes.polls) {
+    markdown = markdown.concat(createPollTable(tweet.includes.polls))
+  }
+
   return frontmatter.concat(markdown).join('\n')
+}
+
+// Creates markdown table to capture poll options and votes
+const createPollTable = polls => {
+  return polls.map(poll => {
+    let table = ['|Option|Votes|', `|---|:---:|`]
+    let options = poll.options.map(option => `|${option.label}|${option.votes}|`)
+    return table.concat(options).join('\n')
+  })
 }
 
 // Write tweet text to file
