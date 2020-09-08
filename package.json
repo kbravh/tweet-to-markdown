@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "axios": "^0.20.0",
-    "command-line-args": "^5.1.1"
+    "command-line-args": "^5.1.1",
+    "command-line-usage": "^6.1.0"
   }
 }

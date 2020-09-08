@@ -2,6 +2,7 @@
 
 const { default: Axios } = require("axios")
 const commandLineArgs = require(`command-line-args`)
+const commandLineUsage = require(`command-line-usage`)
 const fs = require(`fs`)
 const fsp = fs.promises
 const path = require(`path`)
@@ -13,14 +14,38 @@ const errorMessage = message => {
 
 const optionDefinitions = [
   { name: `src`, defaultOption: true },
-  { name: `bearer`, alias: `b` },
-  { name: `path`, alias: `p` },
-  { name: `force`, alias: `f`, type: Boolean },
-  { name: `filename` },
-  { name: `metrics`, alias: `m`, type: Boolean }
+  { name: `help`, alias: `h`, type: Boolean, description: "Display this usage guide." },
+  { name: `bearer`, alias: `b`, description: "The bearer token from the Twitter developer account to authenticate requests." },
+  { name: `path`, alias: `p`, description: "The path to save the file. This path must {italic already exist}. Defaults to the current directory." },
+  { name: `force`, alias: `f`, type: Boolean, description: "Overwrite the file if it already exists." },
+  { name: `metrics`, alias: `m`, type: Boolean, description: "Store likes, tweets, and replies in the frontmatter of the document." },
+  { name: `filename`, description: "The name of the markdown file to be saved. The .md extension will be automatically added. You can use the variables [[name]], [[handle]], and [[id]]." },
+]
+
+const help = [
+  {
+    header: "Tweet to Markdown 🐦",
+    content: "Quickly and easily save Tweets as Markdown files."
+  },
+  {
+    header: "Usage",
+    content: "ttm [flags] <tweet url or id>"
+  },
+  {
+    header: "Options",
+    optionList: optionDefinitions,
+    hide: "src" // src is the default option so we won't show it in the main list
+  }
+
 ]
 
 const options = commandLineArgs(optionDefinitions)
+const helpPage = commandLineUsage(help)
+
+if (options.help) {
+  console.log(helpPage)
+  process.exit(0)
+}
 
 if (!options.src) {
   errorMessage(`A tweet url or id was not provided. Usage: ttm [options] <url or id>`)
@@ -195,9 +220,9 @@ const writeTweet = async (tweet, markdown) => {
 const createFilename = tweet => {
   if (options.filename) {
     let filename = `${options.filename}.md`
-    filename = filename.replace("{{name}}", tweet.includes.users[0].name)
-    filename = filename.replace("{{handle}}", tweet.includes.users[0].username)
-    filename = filename.replace("{{id}}", tweet.data.id)
+    filename = filename.replace("[[name]]", tweet.includes.users[0].name)
+    filename = filename.replace("[[handle]]", tweet.includes.users[0].username)
+    filename = filename.replace("[[id]]", tweet.data.id)
     return filename
   }
   return `${tweet.includes.users[0].username} - ${tweet.data.id}.md`
