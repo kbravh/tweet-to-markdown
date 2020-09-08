@@ -14,7 +14,8 @@ const errorMessage = message => {
 const optionDefinitions = [
   { name: `src`, defaultOption: true },
   { name: `bearer`, alias: `b` },
-  { name: `path`, alias: `p`}
+  { name: `path`, alias: `p` },
+  { name: `force`, alias: `f`, type: Boolean }
 ]
 
 const options = commandLineArgs(optionDefinitions)
@@ -105,10 +106,10 @@ const createPollTable = polls => {
 
 const createMediaElements = media => {
   return media.map(medium => {
-    switch(medium.type){
+    switch (medium.type) {
       case "photo":
         return `![${medium.media_key}](${medium.url})`
-      default: 
+      default:
         break
     }
   })
@@ -118,27 +119,38 @@ const createMediaElements = media => {
 const writeTweet = async (tweet, markdown) => {
   let filepath = ''
   // check if path provided by user is valid and writeable
-  if(options.path){
+  if (options.path) {
     testPath(options.path)
     filepath = options.path
   }
 
+  // create filename
   let filename = `${tweet.includes.users[0].username} - ${tweet.data.id}.md`
-  filepath = path.format({dir: filepath, base: filename})
+  // combine name and path
+  filepath = path.format({ dir: filepath, base: filename })
 
+  //check if file already exists
+  fsp.access(filepath, fs.constants.F_OK).then(_ => {
+    if (!options.force) {
+      errorMessage(`File already exists. Use --force (-f) to overwrite.`)
+    }
+  }).catch(error => {
+    //file does not exist so we can write to it
+  })
+
+  // write the tweet to the file
   await fsp.writeFile(filepath, markdown).catch(error => {
     errorMessage(error)
   })
   console.log(`Tweet saved to ${filepath}`)
 }
 
+// Test if the path exists or is read only
 const testPath = async path => {
   await fsp.access(path, fs.constants.F_OK | fs.constants.W_OK)
     .catch(error => {
       errorMessage(`${path} ${error.code === 'ENOENT' ? 'does not exist' : 'is read-only.'}`)
     })
-  // if we made it past the check, return true
-  return true
 }
 
 const main = async () => {
