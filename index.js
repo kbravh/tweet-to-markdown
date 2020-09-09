@@ -19,7 +19,7 @@ const optionDefinitions = [
   { name: `path`, alias: `p`, description: "The path to save the file. This path must {italic already exist}. Defaults to the current directory." },
   { name: `filename`, description: "The name of the markdown file to be saved. The .md extension will be automatically added. You can use the variables [[name]], [[handle]], and [[id]]." },
   { name: `force`, alias: `f`, type: Boolean, description: "Overwrite the file if it already exists." },
-  { name: `metrics`, alias: `m`, type: Boolean, description: "Store likes, tweets, and replies in the frontmatter of the document." },
+  { name: `metrics`, alias: `m`, type: Boolean, description: "Store the number of likes, tweets, and replies in the frontmatter of the document." },
 ]
 
 const help = [
@@ -238,7 +238,6 @@ const testPath = async path => {
 
 const main = async () => {
   let tweet = await getTweet(id)
-  console.log(JSON.stringify(tweet, null, 2))
   let markdown = buildMarkdown(tweet)
   writeTweet(tweet, markdown)
 }

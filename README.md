@@ -1,2 +1,143 @@
-# tweet-to-markdown
-A command line tool to convert Tweets to Markdown.
+<!-- PROJECT SHIELDS -->
+<!-- [![Contributors][contributors-shield]][contributors-url] -->
+<!-- [![Forks][forks-shield]][forks-url] -->
+<!-- [![Stargazers][stars-shield]][stars-url] -->
+[![Issues][issues-shield]][issues-url]
+[![MIT License][license-shield]][license-url]
+[![LinkedIn][linkedin-shield]][linkedin-url]
+
+<br />
+<p align="center">
+  <a href="https://github.com/kbravh/tweet-to-markdown">
+    <img src="images/tweet-to-markdown-logo.svg" alt="Logo" height=50>
+  </a>
+
+  <h3 align="center">Tweet to Markdown</h3>
+
+  <p align="center">
+    A command line tool to quickly save tweets as Markdown files.
+    <br />
+    <br />
+    <a href="https://github.com/kbravh/tweet-to-markdown/issues">Report a Bug</a>
+    ·
+    <a href="https://github.com/kbravh/tweet-to-markdown/issues">Request a Feature</a>
+  </p>
+</p>
+
+<!-- ABOUT THE PROJECT -->
+
+## About The Project
+
+This command line tool allows you to quickly save a tweet as a Markdown file. This is great for Zettelkasten note-taking or any other commonplace notebook, vade mecum, &c. It is built on the new Twitter v2 API.
+
+<!-- Add gif here -->
+
+## Installing
+
+You can install this CLI tool easily by running
+
+```bash
+yarn global add tweet-to-markdown
+```
+
+or
+
+```bash
+npm install -global tweet-to-markdown
+```
+
+You can also run it without installing:
+
+```bash
+npx tweet-to-markdown
+```
+
+<!-- USAGE EXAMPLES -->
+
+## Usage
+
+To use this tool, you'll need to set up an application and get a bearer token on the [Twitter developer dashboard](https://developer.twitter.com/en/portal/dashboard). Once you have the bearer token, either store it in the environment variable `TWITTER_BEARER_TOKEN` or pass it to the command line tool with the `-b` (`--bearer`) flag.
+
+Grabbing a tweet is as easy as calling the `ttm` command and passing in the tweet URL.
+
+```bash
+ttm --bearer <bearer token> https://twitter.com/JoshWComeau/status/1213870628895428611
+```
+
+The tweet will be saved to a Markdown file with the user's handle and tweet ID in the current directory. Here's how the tweet will look:
+
+![Screenshot of the rendered Markdown file](images/tweet-markdown-screenshot.png)
+
+Any attached images and links will also be linked and displayed in the file.
+
+## Options
+
+### Custom File Name
+
+In order to save the tweet with a custom filename, pass the desired name to the `--filename` flag. You can use the variables `[[name]]`, `[[handle]]`, and `[[id]]` in your filename, which will automatically be replaced. The file extension `.md` will be automatically added.
+
+```bash
+ttm <tweet url> --filename "[[handle]] - Favicon versioning".
+# Tweet saved to JoshWComeau - Favicon versioning.md
+```
+
+If the file already exists, an error will be thrown unless you pass the `-f` (`--force`) flag to overwrite the file.
+
+### Custom File Path
+
+To save the tweet to a place other than the current directory, pass the location to the `-p` (`--path`) flag. This path must already exist or an error will be thrown.
+
+```bash
+ttm <tweet url> --path "./tweets/"
+# Tweet saved to ./tweets/JoshWComeau - 1213870628895428611.md
+```
+
+### Tweet Metrics
+
+If you'd also like to record the number of likes, retweets, and replies the tweet has, pass the `-m` (`--metrics`) flag. This will save those numbers in the frontmatter of the file. 
+
+```bash
+ttm <tweet url> --metrics
+```
+```yaml
+---
+author: Josh ✨
+handle: @JoshWComeau
+likes: 993
+retweets: 163
+replies: 24
+---
+```
+
+
+<!-- CONTRIBUTING -->
+
+## Contributing
+
+Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+1. Fork the Project
+2. Create your Feature Branch ( `git checkout -b feature` )
+3. Commit your Changes ( `git commit -m "Add a cool feature"` )
+4. Push to the Branch ( `git push origin feature` )
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the [ `LICENSE` ](LICENSE) file for details
+
+<!-- CONTACT -->
+
+## Contact
+
+Karey Higuera - [@kbravh](https://twitter.com/kbravh) - karey.higuera@gmail.com
+
+Project Link: [https://github.com/kbravh/tweet-to-markdown](https://github.com/kbravh/tweet-to-markdown)
+
+<!-- MARKDOWN LINKS -->
+[issues-shield]: https://img.shields.io/github/issues/kbravh/tweet-to-markdown.svg?style=flat-square
+[issues-url]: https://github.com/kbravh/tweet-to-markdown/issues
+[license-shield]: https://img.shields.io/github/license/kbravh/tweet-to-markdown.svg?style=flat-square
+[license-url]: https://github.com/kbravh/tweet-to-markdown/blob/master/LICENSE
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555
+[linkedin-url]: https://linkedin.com/in/kbravh
