@@ -1,4 +1,15 @@
 {
+  "name": "tweet-to-markdown",
+  "version": "1.0.0",
+  "description": "Quickly save Tweets as Markdown files.",
+  "main": "index.js",
+  "repository": "https://github.com/kbravh/tweet-to-markdown.git",
+  "author": "Karey Higuera <karey.higuera@gmail.com>",
+  "license": "MIT",
+  "private": false,
+  "bin": {
+    "ttm": "index.js"
+  },
   "dependencies": {
     "axios": "^0.20.0",
     "command-line-args": "^5.1.1",
