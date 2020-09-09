@@ -1,19 +1,17 @@
 #!/usr/bin/env node
 
-const { default: Axios } = require("axios")
 const commandLineArgs = require(`command-line-args`)
 const commandLineUsage = require(`command-line-usage`)
-const clipboard = require(`clipboardy`)
 const chalk = require(`chalk`)
 const fs = require(`fs`)
 const fsp = fs.promises
 const path = require(`path`)
+const util = require(`./util`)
+const log = console.log
 
-const errorMessage = message => {
-  console.log(message)
-  process.exit(1)
-}
-
+/**
+ * The definitions of the command line flags
+ */
 const optionDefinitions = [
   { name: `src`, defaultOption: true },
   { name: `help`, alias: `h`, type: Boolean, description: "Display this usage guide." },
@@ -25,6 +23,9 @@ const optionDefinitions = [
   { name: `metrics`, alias: `m`, type: Boolean, description: "Store the number of likes, tweets, and replies in the frontmatter of the document." },
 ]
 
+/**
+ * The definition of the help page
+ */
 const help = [
   {
     header: "Tweet to Markdown",
@@ -42,62 +43,42 @@ const help = [
 
 ]
 
+// Parse the command line options and generate the help page
 const options = commandLineArgs(optionDefinitions)
 const helpPage = commandLineUsage(help)
 
+/**
+ * Show the help page if requested and immediately end execution
+ */
 if (options.help) {
-  console.log(helpPage)
+  log(helpPage)
   process.exit(0)
 }
 
+/**
+ * If no tweet source was provided, panic
+ */
 if (!options.src) {
-  errorMessage(chalk`{red A tweet url or id was not provided.}\n{bold {underline Usage}}: ttm [options] <url or id>`)
+  util.panic(chalk`{red A tweet url or id was not provided.}\n{bold {underline Usage}}: ttm [options] <url or id>`)
 }
 
+// Pull 🐻 token first from options, then from environment variable
 let bearer = options.bearer || process.env.TWITTER_BEARER_TOKEN
 
+/**
+ * If no 🐻 token provided, panic
+ */
 if (!bearer) {
-  errorMessage(chalk`{red No authorization provided.} You must provide your bearer token.`)
+  util.panic(chalk`{red No authorization provided.} You must provide your bearer token.`)
 }
 
-let id
 // extract tweet ID from URL ID
-try {
-  // Create a URL object with the source. If it fails, it's not a URL.
-  let url = new URL(options.src)
-  id = url.pathname.split('/').slice(-1)[0]
-} catch (error) {
-  id = options.src
-}
+let id = util.getTweetID(options)
 
-// fetch tweet from Twitter API
-const getTweet = async id => {
-  let twitterUrl = new URL(`https://api.twitter.com/2/tweets/${id}`)
-  let params = new URLSearchParams({
-    "expansions": "author_id,attachments.poll_ids,attachments.media_keys",
-    "user.fields": "name,username,profile_image_url",
-    "tweet.fields": "attachments,public_metrics,entities",
-    "media.fields": "url",
-    "poll.fields": "options"
-  })
-
-  return await Axios({
-    method: `GET`,
-    url: `${twitterUrl.href}?${params.toString()}`,
-    headers: { 'Authorization': `Bearer ${bearer}` }
-  })
-    .then(response => response.data)
-    .catch(error => {
-      if (error.response) {
-        errorMessage(chalk.red(error.response.statusText))
-      } else if (error.request) {
-        errorMessage(chalk.red(`There seems to be a connection issue.`))
-      } else {
-        errorMessage(chalk.red(`An error occurred.`))
-      }
-    })
-}
-
+/**
+ * 
+ * @param {tweet} tweet - The entire tweet object provided by the Twitter v2 API
+ */
 const buildMarkdown = tweet => {
   let metrics = []
   if (options.metrics) {
@@ -109,9 +90,14 @@ const buildMarkdown = tweet => {
   }
 
   let text = tweet.data.text
-  // replace entities with markdown links
+
+  /**
+   * replace entities with markdown links
+   */
   if (tweet.data.entities) {
-    // replace any mentions with links
+    /**
+     * replace any mentions with links
+     */
     let mentions = []
     // first, add the @ before any mentions
     tweet.data.entities.mentions && tweet.data.entities.mentions.forEach(mention => {
@@ -122,7 +108,10 @@ const buildMarkdown = tweet => {
     for (const mention of mentions) {
       text = text.replace(`@${mention}`, ` [@${mention}](https://twitter.com/${mention})`)
     }
-    // replace any hashtags with links
+
+    /**
+     * replace any hashtags with links
+     */
     let hashtags = []
     // first, add the # before any hashtags
     tweet.data.entities.hashtags && tweet.data.entities.hashtags.forEach(hashtag => {
@@ -134,12 +123,17 @@ const buildMarkdown = tweet => {
       text = text.replace(`#${hashtag}`, ` [#${hashtag}](https://twitter.com/hashtag/${hashtag}) `)
     }
 
-    // replace hyperlinks with markdown links
+    /**
+     * replace hyperlinks with markdown links
+     */
     tweet.data.entities.urls && tweet.data.entities.urls.forEach(url => {
       text = text.replace(url.url, `[${url.display_url}](${url.expanded_url})`)
     })
   }
 
+  /**
+   * Define the frontmatter as the name and handle
+   */
   let frontmatter = [
     `---`,
     `author: ${tweet.includes.users[0].name}`,
@@ -155,59 +149,43 @@ const buildMarkdown = tweet => {
     `${text}` // text of the tweet
   ]
 
+  // add extra lines for line breaks in markdown
+  markdown = markdown.map(line => line.replace(/\n/g, '\n\n'))
+
   // Add in other tweet elements
   if (tweet.includes.polls) {
-    markdown = markdown.concat(createPollTable(tweet.includes.polls))
+    markdown = markdown.concat(util.createPollTable(tweet.includes.polls))
   }
 
   if (tweet.includes.media) {
-    markdown = markdown.concat(createMediaElements(tweet.includes.media))
+    markdown = markdown.concat(util.createMediaElements(tweet.includes.media))
   }
-
-  // add extra lines for line breaks in markdown
-  markdown = markdown.map(line => line.replace(/\n/g, '\n\n'))
 
   return frontmatter.concat(markdown).join('\n')
 }
 
-// Creates markdown table to capture poll options and votes
-const createPollTable = polls => {
-  return polls.map(poll => {
-    let table = ['|Option|Votes|', `|---|:---:|`]
-    let options = poll.options.map(option => `|${option.label}|${option.votes}|`)
-    return table.concat(options).join('\n')
-  })
-}
-// Creates markdown image links
-const createMediaElements = media => {
-  return media.map(medium => {
-    switch (medium.type) {
-      case "photo":
-        return `![${medium.media_key}](${medium.url})`
-      default:
-        break
-    }
-  })
-}
-
-// Write tweet text to file
+/**
+ * 
+ * @param {tweet} tweet - The entire tweet object from the Twitter v2 API
+ * @param {string} markdown - The markdown string to be written to the file
+ */
 const writeTweet = async (tweet, markdown) => {
   let filepath = ''
   // check if path provided by user is valid and writeable
   if (options.path) {
-    await testPath(options.path)
+    await util.testPath(options.path)
     filepath = options.path
   }
 
   // create filename
-  let filename = createFilename(tweet)
+  let filename = util.createFilename(tweet, options)
   // combine name and path
   filepath = path.format({ dir: filepath, base: filename })
 
   //check if file already exists
   fsp.access(filepath, fs.constants.F_OK).then(_ => {
     if (!options.force) {
-      errorMessage(chalk`{red File already exists.} Use {bold --force (-f)} to overwrite.`)
+      util.panic(chalk`{red File already exists.} Use {bold --force (-f)} to overwrite.`)
     }
   }).catch(error => {
     //file does not exist so we can write to it
@@ -215,43 +193,16 @@ const writeTweet = async (tweet, markdown) => {
 
   // write the tweet to the file
   await fsp.writeFile(filepath, markdown).catch(error => {
-    errorMessage(error)
+    util.panic(error)
   })
-  console.log(chalk`Tweet saved to {bold {underline ${filepath}}}`)
-}
-
-const createFilename = tweet => {
-  if (options.filename) {
-    let filename = `${options.filename}.md`
-    filename = filename.replace("[[name]]", tweet.includes.users[0].name)
-    filename = filename.replace("[[handle]]", tweet.includes.users[0].username)
-    filename = filename.replace("[[id]]", tweet.data.id)
-    return filename
-  }
-  return `${tweet.includes.users[0].username} - ${tweet.data.id}.md`
-}
-
-// Test if the path exists or is read only
-const testPath = async path => {
-  await fsp.access(path, fs.constants.F_OK | fs.constants.W_OK)
-    .catch(error => {
-      errorMessage(chalk`{red The path {bold {underline ${path}}} ${error.code === 'ENOENT' ? 'does not exist.' : 'is read-only.'}}`)
-    })
-}
-
-const copyTweetToClipboard = async markdown => {
-  await clipboard.write(markdown)
-    .catch(error => {
-      errorMessage(chalk`{red There was a problem writing to the clipboard.}`)
-    })
-  console.log(`Tweet copied to the clipboard.`)
+  log(chalk`Tweet saved to {bold {underline ${filepath}}}`)
 }
 
 const main = async () => {
-  let tweet = await getTweet(id)
+  let tweet = await util.getTweet(id, bearer)
   let markdown = buildMarkdown(tweet)
   if(options.clipboard){
-    copyTweetToClipboard(markdown)
+    util.copyToClipboard(markdown)
   }else {
     writeTweet(tweet, markdown)
   }

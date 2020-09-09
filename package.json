@@ -10,11 +10,17 @@
   "bin": {
     "ttm": "index.js"
   },
+  "scripts": {
+    "test": "node test.js"
+  },
   "dependencies": {
     "axios": "^0.20.0",
     "chalk": "^4.1.0",
     "clipboardy": "^2.3.0",
     "command-line-args": "^5.1.1",
     "command-line-usage": "^6.1.0"
+  },
+  "devDependencies": {
+    "baretest": "^2.0.0"
   }
 }

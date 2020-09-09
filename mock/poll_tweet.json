@@ -1,0 +1,45 @@
+{
+  "data": {
+    "attachments": {
+      "poll_ids": [
+        "1029121913858269191"
+      ]
+    },
+    "public_metrics": {
+      "retweet_count": 4,
+      "reply_count": 10,
+      "like_count": 47,
+      "quote_count": 1
+    },
+    "id": "1029121914260860929",
+    "text": "Which is Better?",
+    "author_id": "4071934995"
+  },
+  "includes": {
+    "polls": [
+      {
+        "id": "1029121913858269191",
+        "options": [
+          {
+            "position": 1,
+            "label": "Spring",
+            "votes": 1373
+          },
+          {
+            "position": 2,
+            "label": "Fall",
+            "votes": 3054
+          }
+        ]
+      }
+    ],
+    "users": [
+      {
+        "name": "polls",
+        "id": "4071934995",
+        "username": "polls",
+        "profile_image_url": "https://pbs.twimg.com/profile_images/660160253913382913/qgvYqknJ_normal.jpg"
+      }
+    ]
+  }
+}
