@@ -17,9 +17,9 @@ const optionDefinitions = [
   { name: `help`, alias: `h`, type: Boolean, description: "Display this usage guide." },
   { name: `bearer`, alias: `b`, description: "The bearer token from the Twitter developer account to authenticate requests." },
   { name: `path`, alias: `p`, description: "The path to save the file. This path must {italic already exist}. Defaults to the current directory." },
+  { name: `filename`, description: "The name of the markdown file to be saved. The .md extension will be automatically added. You can use the variables [[name]], [[handle]], and [[id]]." },
   { name: `force`, alias: `f`, type: Boolean, description: "Overwrite the file if it already exists." },
   { name: `metrics`, alias: `m`, type: Boolean, description: "Store likes, tweets, and replies in the frontmatter of the document." },
-  { name: `filename`, description: "The name of the markdown file to be saved. The .md extension will be automatically added. You can use the variables [[name]], [[handle]], and [[id]]." },
 ]
 
 const help = [
