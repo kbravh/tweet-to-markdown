@@ -1,7 +1,15 @@
 const { default: Axios } = require("axios")
 const clipboard = require(`clipboardy`)
-const log = () => {}
-const panic = () => {throw new Error}
+const log = console.log
+
+/**
+ * Displays an error message to the user, then exits the program with a failure code.
+ * @param {string} message - The error message to be displayed to the user
+ */
+const panic = message => {
+  log(message)
+  process.exit(1)
+}
 
 /**
  * Parses out the tweet ID from the URL or ID that the user provided
@@ -105,11 +113,24 @@ const createMediaElements = media => {
   })
 }
 
+/**
+ * Tests if a path exists and if the user has write permission.
+ * @param {string} path - the path to test for access
+ */
+const testPath = async path => {
+  await fsp.access(path, fs.constants.F_OK | fs.constants.W_OK)
+    .catch(error => {
+      util.panic(chalk`{red The path {bold {underline ${path}}} ${error.code === 'ENOENT' ? 'does not exist.' : 'is read-only.'}}`)
+    })
+}
+
 module.exports = {
   getTweetID,
   getTweet,
   copyToClipboard,
   createPollTable,
   createFilename,
-  createMediaElements
+  createMediaElements,
+  panic,
+  testPath
 }

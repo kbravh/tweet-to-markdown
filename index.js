@@ -10,15 +10,6 @@ const util = require(`./util`)
 const log = console.log
 
 /**
- * Displays an error message to the user, then exits the program with a failure code.
- * @param {string} message - The error message to be displayed to the user
- */
-const panic = message => {
-  log(message)
-  process.exit(1)
-}
-
-/**
  * The definitions of the command line flags
  */
 const optionDefinitions = [
@@ -68,7 +59,7 @@ if (options.help) {
  * If no tweet source was provided, panic
  */
 if (!options.src) {
-  panic(chalk`{red A tweet url or id was not provided.}\n{bold {underline Usage}}: ttm [options] <url or id>`)
+  util.panic(chalk`{red A tweet url or id was not provided.}\n{bold {underline Usage}}: ttm [options] <url or id>`)
 }
 
 // Pull 🐻 token first from options, then from environment variable
@@ -78,7 +69,7 @@ let bearer = options.bearer || process.env.TWITTER_BEARER_TOKEN
  * If no 🐻 token provided, panic
  */
 if (!bearer) {
-  panic(chalk`{red No authorization provided.} You must provide your bearer token.`)
+  util.panic(chalk`{red No authorization provided.} You must provide your bearer token.`)
 }
 
 // extract tweet ID from URL ID
@@ -182,7 +173,7 @@ const writeTweet = async (tweet, markdown) => {
   let filepath = ''
   // check if path provided by user is valid and writeable
   if (options.path) {
-    await testPath(options.path)
+    await util.testPath(options.path)
     filepath = options.path
   }
 
@@ -194,7 +185,7 @@ const writeTweet = async (tweet, markdown) => {
   //check if file already exists
   fsp.access(filepath, fs.constants.F_OK).then(_ => {
     if (!options.force) {
-      panic(chalk`{red File already exists.} Use {bold --force (-f)} to overwrite.`)
+      util.panic(chalk`{red File already exists.} Use {bold --force (-f)} to overwrite.`)
     }
   }).catch(error => {
     //file does not exist so we can write to it
@@ -202,21 +193,9 @@ const writeTweet = async (tweet, markdown) => {
 
   // write the tweet to the file
   await fsp.writeFile(filepath, markdown).catch(error => {
-    panic(error)
+    util.panic(error)
   })
   log(chalk`Tweet saved to {bold {underline ${filepath}}}`)
-}
-
-
-/**
- * Tests if a path exists and if the user has write permission.
- * @param {string} path - the path to test for access
- */
-const testPath = async path => {
-  await fsp.access(path, fs.constants.F_OK | fs.constants.W_OK)
-    .catch(error => {
-      panic(chalk`{red The path {bold {underline ${path}}} ${error.code === 'ENOENT' ? 'does not exist.' : 'is read-only.'}}`)
-    })
 }
 
 const main = async () => {

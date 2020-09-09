@@ -38,8 +38,4 @@ test(`user provided name with variables`, () => {
   assert.strictEqual(filename, "Mappletons - Dirt.md")
 })
 
-test(`check non-existent file path`, () => {
-
-})
-
 test.run()
