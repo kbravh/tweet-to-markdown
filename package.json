@@ -7,6 +7,11 @@
   "author": "Karey Higuera <karey.higuera@gmail.com>",
   "license": "MIT",
   "private": false,
+  "keywords": [
+    "tweet",
+    "markdown",
+    "zettel"
+  ],
   "bin": {
     "ttm": "index.js"
   },
