@@ -195,7 +195,7 @@ const writeTweet = async (tweet, markdown) => {
   let filepath = ''
   // check if path provided by user is valid and writeable
   if (options.path) {
-    testPath(options.path)
+    await testPath(options.path)
     filepath = options.path
   }
 
