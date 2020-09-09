@@ -10,7 +10,8 @@
   "keywords": [
     "tweet",
     "markdown",
-    "zettel"
+    "zettel",
+    "md"
   ],
   "bin": {
     "ttm": "index.js"

@@ -45,7 +45,7 @@ yarn global add tweet-to-markdown
 or
 
 ```bash
-npm install -global tweet-to-markdown
+npm install --global tweet-to-markdown
 ```
 
 You can also run it without installing:
