@@ -2,7 +2,6 @@
 
 const commandLineArgs = require(`command-line-args`)
 const commandLineUsage = require(`command-line-usage`)
-const clipboard = require(`clipboardy`)
 const chalk = require(`chalk`)
 const fs = require(`fs`)
 const fsp = fs.promises
@@ -259,23 +258,11 @@ const testPath = async path => {
     })
 }
 
-/**
- * Copies the provided string to the clipboard.
- * @param {string} markdown - The markdown to be copied to the clipboard
- */
-const copyToClipboard = async markdown => {
-  await clipboard.write(markdown)
-    .catch(error => {
-      panic(chalk`{red There was a problem writing to the clipboard.}`)
-    })
-  console.log(`Tweet copied to the clipboard.`)
-}
-
 const main = async () => {
   let tweet = await util.getTweet(id, bearer)
   let markdown = buildMarkdown(tweet)
   if(options.clipboard){
-    copyToClipboard(markdown)
+    util.copyToClipboard(markdown)
   }else {
     writeTweet(tweet, markdown)
   }

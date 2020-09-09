@@ -1,4 +1,5 @@
 const { default: Axios } = require("axios")
+const clipboard = require(`clipboardy`)
 
 /**
  * Parses out the tweet ID from the URL or ID that the user provided
@@ -48,7 +49,20 @@ const getTweet = async (id, bearer) => {
     })
 }
 
+/**
+ * Copies the provided string to the clipboard.
+ * @param {string} markdown - The markdown to be copied to the clipboard
+ */
+const copyToClipboard = async markdown => {
+  await clipboard.write(markdown)
+    .catch(error => {
+      panic(chalk`{red There was a problem writing to the clipboard.}`)
+    })
+  console.log(`Tweet copied to the clipboard.`)
+}
+
 module.exports = {
   getTweetID,
-  getTweet
+  getTweet,
+  copyToClipboard
 }
