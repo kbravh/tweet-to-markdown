@@ -24,7 +24,7 @@ const optionDefinitions = [
 
 const help = [
   {
-    header: "Tweet to Markdown 🐦",
+    header: "Tweet to Markdown",
     content: "Quickly and easily save Tweets as Markdown files."
   },
   {

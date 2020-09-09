@@ -62,9 +62,10 @@ Grabbing a tweet is as easy as calling the `ttm` command and passing in the twee
 
 ```bash
 ttm --bearer <bearer token> https://twitter.com/JoshWComeau/status/1213870628895428611
+# Tweet saved as JoshWComeau - 1213870628895428611.md
 ```
 
-The tweet will be saved to a Markdown file with the user's handle and tweet ID in the current directory. Here's how the tweet will look:
+The tweet will be saved to a Markdown file in the current directory. Here's how the tweet will look:
 
 ![Screenshot of the rendered Markdown file](images/tweet-markdown-screenshot.png)
 
