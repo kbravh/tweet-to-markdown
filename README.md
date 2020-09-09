@@ -15,7 +15,7 @@
   <h3 align="center">Tweet to Markdown</h3>
 
   <p align="center">
-    A command line tool to quickly save tweets as Markdown files.
+    A command line tool to quickly save tweets as Markdown.
     <br />
     <br />
     <a href="https://github.com/kbravh/tweet-to-markdown/issues">Report a Bug</a>
@@ -28,9 +28,9 @@
 
 ## About The Project
 
-This command line tool allows you to quickly save a tweet as a Markdown file. This is great for Zettelkasten note-taking or any other commonplace notebook, vade mecum, &c. It is built on the new Twitter v2 API.
+This command line tool allows you to quickly save a tweet in Markdown format. This is great for Zettelkasten note-taking or any other commonplace notebook, vade mecum, Obsidian, Roam, Foam, &c. It is built on the new Twitter v2 API.
 
-<!-- Add gif here -->
+![Demo of `ttm` in the command line](./images/ttm_demo.gif)
 
 ## Installing
 
@@ -56,7 +56,7 @@ npx tweet-to-markdown
 
 ## Usage
 
-To use this tool, you'll need to set up an application and get a bearer token on the [Twitter developer dashboard](https://developer.twitter.com/en/portal/dashboard). Once you have the bearer token, either store it in the environment variable `TWITTER_BEARER_TOKEN` or pass it to the command line tool with the `-b` (`--bearer`) flag.
+To use this tool, you'll need to set up an application and get a bearer token on the [Twitter developer dashboard](https://developer.twitter.com/en/portal/dashboard). Once you have the bearer token, either store it in the environment variable `TWITTER_BEARER_TOKEN` or pass it to the command line tool with the `-b` (`--bearer`) flag with each call.
 
 Grabbing a tweet is as easy as calling the `ttm` command and passing in the tweet URL.
 
@@ -73,9 +73,18 @@ Any attached images, polls, and links will also be linked and displayed in the f
 
 ## Options
 
+### Copy to Clipboard
+
+What if you want to just copy the Markdown to the clipboard instead of saving to a file? Why, it's as simple as just passing the `-c` (`--clipboard`) flag.
+
+```bash
+ttm -c https://twitter.com/JoshWComeau/status/1213870628895428611
+#Tweet copied to the clipboard.
+```
+
 ### Custom File Name
 
-In order to save the tweet with a custom filename, pass the desired name to the `--filename` flag. You can use the variables `[[name]]`, `[[handle]]`, and `[[id]]` in your filename, which will automatically be replaced. The file extension `.md` will be automatically added.
+In order to save the tweet with a custom filename, pass the desired name to the `--filename` flag. You can use the variables `[[name]]`, `[[handle]]`, and `[[id]]` in your filename, which will automatically be replaced. The file extension `.md` will also be added.
 
 ```bash
 ttm <tweet url> --filename "[[handle]] - Favicon versioning".

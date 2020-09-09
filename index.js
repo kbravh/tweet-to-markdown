@@ -3,6 +3,7 @@
 const { default: Axios } = require("axios")
 const commandLineArgs = require(`command-line-args`)
 const commandLineUsage = require(`command-line-usage`)
+const clipboard = require(`clipboardy`)
 const chalk = require(`chalk`)
 const fs = require(`fs`)
 const fsp = fs.promises
@@ -17,6 +18,7 @@ const optionDefinitions = [
   { name: `src`, defaultOption: true },
   { name: `help`, alias: `h`, type: Boolean, description: "Display this usage guide." },
   { name: `bearer`, alias: `b`, description: "The bearer token from the Twitter developer account to authenticate requests." },
+  { name: `clipboard`, alias: `c`, type: Boolean, description: "Copy the generated markdown to the clipboard instead of saving a Markdown file."},
   { name: `path`, alias: `p`, description: "The path to save the file. This path must {italic already exist}. Defaults to the current directory." },
   { name: `filename`, description: "The name of the markdown file to be saved. The .md extension will be automatically added. You can use the variables [[name]], [[handle]], and [[id]]." },
   { name: `force`, alias: `f`, type: Boolean, description: "Overwrite the file if it already exists." },
@@ -237,10 +239,22 @@ const testPath = async path => {
     })
 }
 
+const copyTweetToClipboard = async markdown => {
+  await clipboard.write(markdown)
+    .catch(error => {
+      errorMessage(chalk`{red There was a problem writing to the clipboard.}`)
+    })
+  console.log(`Tweet copied to the clipboard.`)
+}
+
 const main = async () => {
   let tweet = await getTweet(id)
   let markdown = buildMarkdown(tweet)
-  writeTweet(tweet, markdown)
+  if(options.clipboard){
+    copyTweetToClipboard(markdown)
+  }else {
+    writeTweet(tweet, markdown)
+  }
 }
 
 main()
