@@ -75,9 +75,41 @@ const createPollTable = polls => {
   })
 }
 
+/**
+ * Creates a filename based on the tweet and the user defined options.
+ * @param {tweet} tweet - The entire tweet object from the Twitter v2 API
+ */
+const createFilename = (tweet, options) => {
+  if (options.filename) {
+    let filename = `${options.filename}.md`
+    filename = filename.replace("[[name]]", tweet.includes.users[0].name)
+    filename = filename.replace("[[handle]]", tweet.includes.users[0].username)
+    filename = filename.replace("[[id]]", tweet.data.id)
+    return filename
+  }
+  return `${tweet.includes.users[0].username} - ${tweet.data.id}.md`
+}
+
+/**
+ * Creates media links to embed media into the markdown file
+ * @param {media} media - The tweet media object provided by the Twitter v2 API
+ */
+const createMediaElements = media => {
+  return media.map(medium => {
+    switch (medium.type) {
+      case "photo":
+        return `![${medium.media_key}](${medium.url})`
+      default:
+        break
+    }
+  })
+}
+
 module.exports = {
   getTweetID,
   getTweet,
   copyToClipboard,
-  createPollTable
+  createPollTable,
+  createFilename,
+  createMediaElements
 }
