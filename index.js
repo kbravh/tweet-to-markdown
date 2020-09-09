@@ -3,12 +3,13 @@
 const { default: Axios } = require("axios")
 const commandLineArgs = require(`command-line-args`)
 const commandLineUsage = require(`command-line-usage`)
+const chalk = require(`chalk`)
 const fs = require(`fs`)
 const fsp = fs.promises
 const path = require(`path`)
 
 const errorMessage = message => {
-  console.error(message)
+  console.log(message)
   process.exit(1)
 }
 
@@ -48,13 +49,13 @@ if (options.help) {
 }
 
 if (!options.src) {
-  errorMessage(`A tweet url or id was not provided. Usage: ttm [options] <url or id>`)
+  errorMessage(chalk`{red A tweet url or id was not provided.}\n{bold {underline Usage}}: ttm [options] <url or id>`)
 }
 
 let bearer = options.bearer || process.env.TWITTER_BEARER_TOKEN
 
 if (!bearer) {
-  errorMessage(`No authorization provided. You must provide your bearer token.`)
+  errorMessage(chalk`{red No authorization provided.} You must provide your bearer token.`)
 }
 
 let id
@@ -86,11 +87,11 @@ const getTweet = async id => {
     .then(response => response.data)
     .catch(error => {
       if (error.response) {
-        errorMessage(error.response.statusText)
+        errorMessage(chalk.red(error.response.statusText))
       } else if (error.request) {
-        errorMessage(`There seems to be a connection issue.`)
+        errorMessage(chalk.red(`There seems to be a connection issue.`))
       } else {
-        errorMessage(`An error occurred.`)
+        errorMessage(chalk.red(`An error occurred.`))
       }
     })
 }
@@ -204,7 +205,7 @@ const writeTweet = async (tweet, markdown) => {
   //check if file already exists
   fsp.access(filepath, fs.constants.F_OK).then(_ => {
     if (!options.force) {
-      errorMessage(`File already exists. Use --force (-f) to overwrite.`)
+      errorMessage(chalk`{red File already exists.} Use {bold --force (-f)} to overwrite.`)
     }
   }).catch(error => {
     //file does not exist so we can write to it
@@ -214,7 +215,7 @@ const writeTweet = async (tweet, markdown) => {
   await fsp.writeFile(filepath, markdown).catch(error => {
     errorMessage(error)
   })
-  console.log(`Tweet saved to ${filepath}`)
+  console.log(chalk`Tweet saved to {bold {underline ${filepath}}}`)
 }
 
 const createFilename = tweet => {
@@ -232,7 +233,7 @@ const createFilename = tweet => {
 const testPath = async path => {
   await fsp.access(path, fs.constants.F_OK | fs.constants.W_OK)
     .catch(error => {
-      errorMessage(`${path} ${error.code === 'ENOENT' ? 'does not exist' : 'is read-only.'}`)
+      errorMessage(chalk`{red The path {bold {underline ${path}}} ${error.code === 'ENOENT' ? 'does not exist.' : 'is read-only.'}}`)
     })
 }
 

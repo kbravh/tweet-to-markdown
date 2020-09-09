@@ -69,7 +69,7 @@ The tweet will be saved to a Markdown file in the current directory. Here's how 
 
 ![Screenshot of the rendered Markdown file](images/tweet-markdown-screenshot.png)
 
-Any attached images and links will also be linked and displayed in the file.
+Any attached images, polls, and links will also be linked and displayed in the file.
 
 ## Options
 
