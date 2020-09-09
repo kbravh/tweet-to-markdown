@@ -1,7 +1,7 @@
 <!-- PROJECT SHIELDS -->
 <!-- [![Contributors][contributors-shield]][contributors-url] -->
 <!-- [![Forks][forks-shield]][forks-url] -->
-<!-- [![Stargazers][stars-shield]][stars-url] -->
+[![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
@@ -153,3 +153,5 @@ Project Link: [https://github.com/kbravh/tweet-to-markdown](https://github.com/k
 [license-url]: https://github.com/kbravh/tweet-to-markdown/blob/master/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/kbravh
+[stars-shield]: https://img.shields.io/github/stars/kbravh/tweet-to-markdown.svg?style=flat-square
+[stars-url]: https://github.com/kbravh/tweet-to-markdown/stargazers
