@@ -7,13 +7,14 @@ const fs = require(`fs`)
 const fsp = fs.promises
 const path = require(`path`)
 const util = require(`./util`)
+const log = console.log
 
 /**
  * Displays an error message to the user, then exits the program with a failure code.
  * @param {string} message - The error message to be displayed to the user
  */
 const panic = message => {
-  console.log(message)
+  log(message)
   process.exit(1)
 }
 
@@ -59,7 +60,7 @@ const helpPage = commandLineUsage(help)
  * Show the help page if requested and immediately end execution
  */
 if (options.help) {
-  console.log(helpPage)
+  log(helpPage)
   process.exit(0)
 }
 
@@ -157,32 +158,21 @@ const buildMarkdown = tweet => {
     `${text}` // text of the tweet
   ]
 
+  // add extra lines for line breaks in markdown
+  markdown = markdown.map(line => line.replace(/\n/g, '\n\n'))
+
   // Add in other tweet elements
   if (tweet.includes.polls) {
-    markdown = markdown.concat(createPollTable(tweet.includes.polls))
+    markdown = markdown.concat(util.createPollTable(tweet.includes.polls))
   }
 
   if (tweet.includes.media) {
     markdown = markdown.concat(createMediaElements(tweet.includes.media))
   }
 
-  // add extra lines for line breaks in markdown
-  markdown = markdown.map(line => line.replace(/\n/g, '\n\n'))
-
   return frontmatter.concat(markdown).join('\n')
 }
 
-/**
- * Creates markdown table to capture poll options and votes
- * @param {polls} polls - The polls object provided by the Twitter v2 API
- */
-const createPollTable = polls => {
-  return polls.map(poll => {
-    let table = ['|Option|Votes|', `|---|:---:|`]
-    let options = poll.options.map(option => `|${option.label}|${option.votes}|`)
-    return table.concat(options).join('\n')
-  })
-}
 /**
  * Creates media links to embed media into the markdown file
  * @param {media} media - The tweet media object provided by the Twitter v2 API
@@ -229,7 +219,7 @@ const writeTweet = async (tweet, markdown) => {
   await fsp.writeFile(filepath, markdown).catch(error => {
     panic(error)
   })
-  console.log(chalk`Tweet saved to {bold {underline ${filepath}}}`)
+  log(chalk`Tweet saved to {bold {underline ${filepath}}}`)
 }
 
 /**

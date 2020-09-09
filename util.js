@@ -1,5 +1,7 @@
 const { default: Axios } = require("axios")
 const clipboard = require(`clipboardy`)
+const log = () => {}
+const panic = () => {throw new Error}
 
 /**
  * Parses out the tweet ID from the URL or ID that the user provided
@@ -58,11 +60,24 @@ const copyToClipboard = async markdown => {
     .catch(error => {
       panic(chalk`{red There was a problem writing to the clipboard.}`)
     })
-  console.log(`Tweet copied to the clipboard.`)
+  log(`Tweet copied to the clipboard.`)
+}
+
+/**
+ * Creates markdown table to capture poll options and votes
+ * @param {polls} polls - The polls object provided by the Twitter v2 API
+ */
+const createPollTable = polls => {
+  return polls.map(poll => {
+    let table = ['\n|Option|Votes|', `|---|:---:|`]
+    let options = poll.options.map(option => `|${option.label}|${option.votes}|`)
+    return table.concat(options).join('\n')
+  })
 }
 
 module.exports = {
   getTweetID,
   getTweet,
-  copyToClipboard
+  copyToClipboard,
+  createPollTable
 }
