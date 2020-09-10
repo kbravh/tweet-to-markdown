@@ -16,7 +16,7 @@ const panic = message => {
  * Parses out the tweet ID from the URL or ID that the user provided
  * @param {options} options - The parsed command line arguments
  */
-const getTweetID = ({src}) => {
+const getTweetID = ({ src }) => {
   let id
   try {
     // Create a URL object with the source. If it fails, it's not a URL.
@@ -49,6 +49,13 @@ const getTweet = async (id, bearer) => {
     headers: { 'Authorization': `Bearer ${bearer}` }
   })
     .then(response => response.data)
+    .then(tweet => {
+      if (tweet.errors) {
+        panic(chalk`{red ${tweet.errors[0].detail}}`)
+      } else { 
+        return tweet
+      }
+    })
     .catch(error => {
       if (error.response) {
         panic(chalk.red(error.response.statusText))
