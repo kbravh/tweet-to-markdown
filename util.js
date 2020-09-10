@@ -1,6 +1,7 @@
 const { default: Axios } = require("axios")
 const clipboard = require(`clipboardy`)
 const log = console.log
+const chalk = require(`chalk`)
 
 /**
  * Displays an error message to the user, then exits the program with a failure code.
