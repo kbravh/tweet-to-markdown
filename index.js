@@ -98,30 +98,21 @@ const buildMarkdown = tweet => {
     /**
      * replace any mentions, hashtags, cashtags with links
      */
-    let mentions = []
     // first, add the @ before any mentions
     if(tweet.data.entities.mentions){
-      mentions = tweet.data.entities.mentions.map(mention => mention.username)
+      mentions = tweet.data.entities.mentions.forEach(({username}) => {
+        text = text.replace(`@${username}`, `[@${username}](https://twitter.com/${username})`)
+      })
     }
-    let hashtags = []
     if(tweet.data.entities.hashtags){
-      hashtags = tweet.data.entities.hashtags.map(hashtag => hashtag.tag)
+      hashtags = tweet.data.entities.hashtags.forEach(({tag}) => {
+        text = text.replace(`#${tag}`, `[#${tag}](https://twitter.com/hashtag/${tag}) `)
+      })
     }
-    let cashtags = []
     if(tweet.data.entities.cashtags){
-      cashtags = tweet.data.entities.cashtags.map(cashtag => cashtag.tag)
-    }
-    // replace all @s with their hyperlinks
-    for (const mention of mentions) {
-      text = text.replace(`@${mention}`, `[@${mention}](https://twitter.com/${mention})`)
-    }
-    // replace all #s with their hyperlinks
-    for (const hashtag of hashtags) {
-      text = text.replace(`#${hashtag}`, `[#${hashtag}](https://twitter.com/hashtag/${hashtag}) `)
-    }
-    // replace all $s with their hyperlinks
-    for (const cashtag of cashtags) {
-      text = text.replace(`$${cashtag}`, `[$${cashtag}](https://twitter.com/search?q=%24${cashtag})`)
+      cashtags = tweet.data.entities.cashtags.forEach(({tag}) => {
+        text = text.replace(`$${tag}`, `[$${tag}](https://twitter.com/search?q=%24${tag})`)
+      })
     }
 
     /**
@@ -201,7 +192,6 @@ const writeTweet = async (tweet, markdown) => {
 
 const main = async () => {
   let tweet = await util.getTweet(id, bearer)
-  console.log(JSON.stringify(tweet, null, 2))
   let markdown = buildMarkdown(tweet)
   if (options.clipboard) {
     util.copyToClipboard(markdown)
