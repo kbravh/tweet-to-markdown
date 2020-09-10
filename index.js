@@ -16,7 +16,7 @@ const optionDefinitions = [
   { name: `src`, defaultOption: true },
   { name: `help`, alias: `h`, type: Boolean, description: "Display this usage guide." },
   { name: `bearer`, alias: `b`, description: "The bearer token from the Twitter developer account to authenticate requests." },
-  { name: `clipboard`, alias: `c`, type: Boolean, description: "Copy the generated markdown to the clipboard instead of saving a Markdown file."},
+  { name: `clipboard`, alias: `c`, type: Boolean, description: "Copy the generated markdown to the clipboard instead of saving a Markdown file." },
   { name: `path`, alias: `p`, description: "The path to save the file. This path must {italic already exist}. Defaults to the current directory." },
   { name: `filename`, description: "The name of the markdown file to be saved. The .md extension will be automatically added. You can use the variables [[name]], [[handle]], and [[id]]." },
   { name: `force`, alias: `f`, type: Boolean, description: "Overwrite the file if it already exists." },
@@ -96,7 +96,7 @@ const buildMarkdown = tweet => {
    */
   if (tweet.data.entities) {
     /**
-     * replace any mentions with links
+     * replace any mentions, hashtags, cashtags with links
      */
     let mentions = []
     // first, add the @ before any mentions
@@ -104,23 +104,27 @@ const buildMarkdown = tweet => {
       mentions.push(mention.username)
       text = text.substring(0, mention.start) + `@${mention.username}` + text.substring(mention.end + 1)
     })
-    // then, replace all @s with their hyperlinks
-    for (const mention of mentions) {
-      text = text.replace(`@${mention}`, ` [@${mention}](https://twitter.com/${mention})`)
-    }
-
-    /**
-     * replace any hashtags with links
-     */
     let hashtags = []
     // first, add the # before any hashtags
     tweet.data.entities.hashtags && tweet.data.entities.hashtags.forEach(hashtag => {
       hashtags.push(hashtag.tag)
       text = text.substring(0, hashtag.start) + `#${hashtag.tag}` + text.substring(hashtag.end + 1)
     })
+    let cashtags = []
+    tweet.data.entities.cashtags && tweet.data.entities.cashtags.forEach(cashtag => {
+      cashtags.push(cashtag.tag)
+    })
+    // then, replace all @s with their hyperlinks
+    for (const mention of mentions) {
+      text = text.replace(`@${mention}`, ` [@${mention}](https://twitter.com/${mention})`)
+    }
     // then, replace all #s with their hyperlinks
     for (const hashtag of hashtags) {
       text = text.replace(`#${hashtag}`, ` [#${hashtag}](https://twitter.com/hashtag/${hashtag}) `)
+    }
+    // then, replace all $s with their hyperlinks
+    for (const cashtag of cashtags) {
+      text = text.replace(`$${cashtag}`, ` [$${cashtag}](https://twitter.com/search?q=%24${cashtag})`)
     }
 
     /**
@@ -201,9 +205,9 @@ const writeTweet = async (tweet, markdown) => {
 const main = async () => {
   let tweet = await util.getTweet(id, bearer)
   let markdown = buildMarkdown(tweet)
-  if(options.clipboard){
+  if (options.clipboard) {
     util.copyToClipboard(markdown)
-  }else {
+  } else {
     writeTweet(tweet, markdown)
   }
 }
