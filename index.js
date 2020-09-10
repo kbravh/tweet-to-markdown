@@ -100,31 +100,28 @@ const buildMarkdown = tweet => {
      */
     let mentions = []
     // first, add the @ before any mentions
-    tweet.data.entities.mentions && tweet.data.entities.mentions.forEach(mention => {
-      mentions.push(mention.username)
-      text = text.substring(0, mention.start) + `@${mention.username}` + text.substring(mention.end + 1)
-    })
+    if(tweet.data.entities.mentions){
+      mentions = tweet.data.entities.mentions.map(mention => mention.username)
+    }
     let hashtags = []
-    // first, add the # before any hashtags
-    tweet.data.entities.hashtags && tweet.data.entities.hashtags.forEach(hashtag => {
-      hashtags.push(hashtag.tag)
-      text = text.substring(0, hashtag.start) + `#${hashtag.tag}` + text.substring(hashtag.end + 1)
-    })
+    if(tweet.data.entities.hashtags){
+      hashtags = tweet.data.entities.hashtags.map(hashtag => hashtag.tag)
+    }
     let cashtags = []
-    tweet.data.entities.cashtags && tweet.data.entities.cashtags.forEach(cashtag => {
-      cashtags.push(cashtag.tag)
-    })
-    // then, replace all @s with their hyperlinks
+    if(tweet.data.entities.cashtags){
+      cashtags = tweet.data.entities.cashtags.map(cashtag => cashtag.tag)
+    }
+    // replace all @s with their hyperlinks
     for (const mention of mentions) {
-      text = text.replace(`@${mention}`, ` [@${mention}](https://twitter.com/${mention})`)
+      text = text.replace(`@${mention}`, `[@${mention}](https://twitter.com/${mention})`)
     }
-    // then, replace all #s with their hyperlinks
+    // replace all #s with their hyperlinks
     for (const hashtag of hashtags) {
-      text = text.replace(`#${hashtag}`, ` [#${hashtag}](https://twitter.com/hashtag/${hashtag}) `)
+      text = text.replace(`#${hashtag}`, `[#${hashtag}](https://twitter.com/hashtag/${hashtag}) `)
     }
-    // then, replace all $s with their hyperlinks
+    // replace all $s with their hyperlinks
     for (const cashtag of cashtags) {
-      text = text.replace(`$${cashtag}`, ` [$${cashtag}](https://twitter.com/search?q=%24${cashtag})`)
+      text = text.replace(`$${cashtag}`, `[$${cashtag}](https://twitter.com/search?q=%24${cashtag})`)
     }
 
     /**
@@ -204,6 +201,7 @@ const writeTweet = async (tweet, markdown) => {
 
 const main = async () => {
   let tweet = await util.getTweet(id, bearer)
+  console.log(JSON.stringify(tweet, null, 2))
   let markdown = buildMarkdown(tweet)
   if (options.clipboard) {
     util.copyToClipboard(markdown)
