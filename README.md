@@ -34,7 +34,7 @@ This command line tool allows you to quickly save a tweet in Markdown format. Th
 
 ## Installing
 
-You'll need to have Node.js of at least `v10.0` to use this tool.
+⚠ **You'll need to have Node.js of at least `v10.x` to use this tool.**
 
 You can install this CLI tool easily by running
 
