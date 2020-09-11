@@ -1,6 +1,8 @@
 const { default: Axios } = require("axios")
 const clipboard = require(`clipboardy`)
 const log = console.log
+const fs = require(`fs`)
+const fsp = fs.promises
 const chalk = require(`chalk`)
 const URL = require(`url`).URL
 
@@ -129,7 +131,7 @@ const createMediaElements = media => {
 const testPath = async path => {
   await fsp.access(path, fs.constants.F_OK | fs.constants.W_OK)
     .catch(error => {
-      util.panic(chalk`{red The path {bold {underline ${path}}} ${error.code === 'ENOENT' ? 'does not exist.' : 'is read-only.'}}`)
+      panic(chalk`{red The path {bold {underline ${path}}} ${error.code === 'ENOENT' ? 'does not exist.' : 'is read-only.'}}`)
     })
 }
 
