@@ -77,87 +77,6 @@ let id = util.getTweetID(options)
 
 /**
  * 
- * @param {tweet} tweet - The entire tweet object provided by the Twitter v2 API
- */
-const buildMarkdown = tweet => {
-  let metrics = []
-  if (options.metrics) {
-    metrics = [
-      `likes: ${tweet.data.public_metrics.like_count}`,
-      `retweets: ${tweet.data.public_metrics.retweet_count}`,
-      `replies: ${tweet.data.public_metrics.reply_count}`
-    ]
-  }
-
-  let text = tweet.data.text
-
-  /**
-   * replace entities with markdown links
-   */
-  if (tweet.data.entities) {
-    /**
-     * replace any mentions, hashtags, cashtags with links
-     */
-    // first, add the @ before any mentions
-    if(tweet.data.entities.mentions){
-      mentions = tweet.data.entities.mentions.forEach(({username}) => {
-        text = text.replace(`@${username}`, `[@${username}](https://twitter.com/${username})`)
-      })
-    }
-    if(tweet.data.entities.hashtags){
-      hashtags = tweet.data.entities.hashtags.forEach(({tag}) => {
-        text = text.replace(`#${tag}`, `[#${tag}](https://twitter.com/hashtag/${tag}) `)
-      })
-    }
-    if(tweet.data.entities.cashtags){
-      cashtags = tweet.data.entities.cashtags.forEach(({tag}) => {
-        text = text.replace(`$${tag}`, `[$${tag}](https://twitter.com/search?q=%24${tag})`)
-      })
-    }
-
-    /**
-     * replace hyperlinks with markdown links
-     */
-    tweet.data.entities.urls && tweet.data.entities.urls.forEach(url => {
-      text = text.replace(url.url, `[${url.display_url}](${url.expanded_url})`)
-    })
-  }
-
-  /**
-   * Define the frontmatter as the name and handle
-   */
-  let frontmatter = [
-    `---`,
-    `author: ${tweet.includes.users[0].name}`,
-    `handle: @${tweet.includes.users[0].username}`,
-    ...metrics,
-    `---`
-  ]
-
-  let markdown = [
-    `![${tweet.includes.users[0].username}](${tweet.includes.users[0].profile_image_url})`, // profile image
-    `${tweet.includes.users[0].name} ([@${tweet.includes.users[0].username}](https://twitter.com/${tweet.includes.users[0].username}))`, // name and handle
-    `\n`,
-    `${text}` // text of the tweet
-  ]
-
-  // add extra lines for line breaks in markdown
-  markdown = markdown.map(line => line.replace(/\n/g, '\n\n'))
-
-  // Add in other tweet elements
-  if (tweet.includes.polls) {
-    markdown = markdown.concat(util.createPollTable(tweet.includes.polls))
-  }
-
-  if (tweet.includes.media) {
-    markdown = markdown.concat(util.createMediaElements(tweet.includes.media))
-  }
-
-  return frontmatter.concat(markdown).join('\n')
-}
-
-/**
- * 
  * @param {tweet} tweet - The entire tweet object from the Twitter v2 API
  * @param {string} markdown - The markdown string to be written to the file
  */
@@ -192,7 +111,7 @@ const writeTweet = async (tweet, markdown) => {
 
 const main = async () => {
   let tweet = await util.getTweet(id, bearer)
-  let markdown = buildMarkdown(tweet)
+  let markdown = util.buildMarkdown(tweet, options)
   if (options.clipboard) {
     util.copyToClipboard(markdown)
   } else {

@@ -133,6 +133,77 @@ const testPath = async path => {
     })
 }
 
+/**
+ * 
+ * @param {tweet} tweet - The entire tweet object provided by the Twitter v2 API
+ * @param {options} options - The parsed command line arguments
+ */
+const buildMarkdown = (tweet, options) => {
+  let metrics = []
+  if (options.metrics) {
+    metrics = [
+      `likes: ${tweet.data.public_metrics.like_count}`,
+      `retweets: ${tweet.data.public_metrics.retweet_count}`,
+      `replies: ${tweet.data.public_metrics.reply_count}`
+    ]
+  }
+
+  let text = tweet.data.text
+
+  /**
+   * replace entities with markdown links
+   */
+  if (tweet.data.entities) {
+    /**
+     * replace any mentions, hashtags, cashtags, urls with links
+     */
+    tweet.data.entities.mentions && tweet.data.entities.mentions.forEach(({ username }) => {
+      text = text.replace(`@${username}`, `[@${username}](https://twitter.com/${username})`)
+    })
+    tweet.data.entities.hashtags && tweet.data.entities.hashtags.forEach(({ tag }) => {
+      text = text.replace(`#${tag}`, `[#${tag}](https://twitter.com/hashtag/${tag}) `)
+    })
+    tweet.data.entities.cashtags && tweet.data.entities.cashtags.forEach(({ tag }) => {
+      text = text.replace(`$${tag}`, `[$${tag}](https://twitter.com/search?q=%24${tag})`)
+    })
+    tweet.data.entities.urls && tweet.data.entities.urls.forEach(url => {
+      text = text.replace(url.url, `[${url.display_url}](${url.expanded_url})`)
+    })
+  }
+
+  /**
+   * Define the frontmatter as the name and handle
+   */
+  let frontmatter = [
+    `---`,
+    `author: ${tweet.includes.users[0].name}`,
+    `handle: @${tweet.includes.users[0].username}`,
+    ...metrics,
+    `---`
+  ]
+
+  let markdown = [
+    `![${tweet.includes.users[0].username}](${tweet.includes.users[0].profile_image_url})`, // profile image
+    `${tweet.includes.users[0].name} ([@${tweet.includes.users[0].username}](https://twitter.com/${tweet.includes.users[0].username}))`, // name and handle
+    `\n`,
+    `${text}` // text of the tweet
+  ]
+
+  // markdown requires 2 line breaks for actual new lines
+  markdown = markdown.map(line => line.replace(/\n/g, '\n\n'))
+
+  // Add in other tweet elements
+  if (tweet.includes.polls) {
+    markdown = markdown.concat(createPollTable(tweet.includes.polls))
+  }
+
+  if (tweet.includes.media) {
+    markdown = markdown.concat(createMediaElements(tweet.includes.media))
+  }
+
+  return frontmatter.concat(markdown).join('\n')
+}
+
 module.exports = {
   getTweetID,
   getTweet,
@@ -141,5 +212,6 @@ module.exports = {
   createFilename,
   createMediaElements,
   panic,
-  testPath
+  testPath,
+  buildMarkdown
 }
