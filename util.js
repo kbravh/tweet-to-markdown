@@ -1,8 +1,14 @@
-const { default: Axios } = require("axios")
+const { default: Axios } = require(`axios`)
+const axiosRetry = require(`axios-retry`)
 const clipboard = require(`clipboardy`)
 const log = console.log
+const fs = require(`fs`)
+const path = require(`path`)
+const fsp = fs.promises
 const chalk = require(`chalk`)
 const URL = require(`url`).URL
+
+axiosRetry(Axios, {retries: 3})
 
 /**
  * Displays an error message to the user, then exits the program with a failure code.
@@ -12,6 +18,25 @@ const panic = message => {
   log(message)
   process.exit(1)
 }
+
+/**
+ * Download the remote image url to the local path.
+ * @param {string} url - The remote image URL to download
+ * @param {string} image_path - The local path to save the image
+ */
+const downloadImage = (url, image_path) =>
+  Axios({
+    url,
+    responseType: 'stream',
+  }).then(
+    response =>
+      new Promise((resolve, reject) => {
+        response.data
+          .pipe(fs.createWriteStream(image_path))
+          .on('finish', () => resolve())
+          .on('error', e => reject(e));
+      }),
+  );
 
 /**
  * Parses out the tweet ID from the URL or ID that the user provided
@@ -33,6 +58,7 @@ const getTweetID = ({ src }) => {
 /**
  * Fetches a tweet object from the Twitter v2 API
  * @param {string} id - The ID of the tweet to fetch from the API
+ * @param {string} bearer - The bearer token 
  */
 const getTweet = async (id, bearer) => {
   let twitterUrl = new URL(`https://api.twitter.com/2/tweets/${id}`)
@@ -53,7 +79,7 @@ const getTweet = async (id, bearer) => {
     .then(tweet => {
       if (tweet.errors) {
         panic(chalk`{red ${tweet.errors[0].detail}}`)
-      } else { 
+      } else {
         return tweet
       }
     })
@@ -111,11 +137,17 @@ const createFilename = (tweet, options) => {
  * Creates media links to embed media into the markdown file
  * @param {media} media - The tweet media object provided by the Twitter v2 API
  */
-const createMediaElements = media => {
+const createMediaElements = (media, options) => {
+  // If the user wants to download assets locally, we'll need to define the path
+  let localAssetPath = options.assetsPath ? options.assetsPath : './tweet-assets'
+  // we need the relative path to the assets from the notes
+  let relativeAssetPath = path.relative(options.path ? options.path : `.`, localAssetPath)
   return media.map(medium => {
     switch (medium.type) {
       case "photo":
-        return `![${medium.media_key}](${medium.url})`
+        return options.assets 
+        ? `\n![${medium.media_key}](${path.join(relativeAssetPath, `${medium.media_key}.jpg`)})`
+        : `\n![${medium.media_key}](${medium.url})`
       default:
         break
     }
@@ -138,7 +170,7 @@ const testPath = async path => {
  * @param {tweet} tweet - The entire tweet object provided by the Twitter v2 API
  * @param {options} options - The parsed command line arguments
  */
-const buildMarkdown = (tweet, options) => {
+const buildMarkdown = async (tweet, options) => {
   let metrics = []
   if (options.metrics) {
     metrics = [
@@ -149,6 +181,7 @@ const buildMarkdown = (tweet, options) => {
   }
 
   let text = tweet.data.text
+  let user = tweet.includes.users[0]
 
   /**
    * replace entities with markdown links
@@ -176,15 +209,20 @@ const buildMarkdown = (tweet, options) => {
    */
   let frontmatter = [
     `---`,
-    `author: ${tweet.includes.users[0].name}`,
-    `handle: @${tweet.includes.users[0].username}`,
+    `author: ${user.name}`,
+    `handle: @${user.username}`,
     ...metrics,
     `---`
   ]
 
+  // if the user wants local assets, download them
+  if (options.assets) {
+    await downloadAssets(tweet, options)
+  }
+
   let markdown = [
-    `![${tweet.includes.users[0].username}](${tweet.includes.users[0].profile_image_url})`, // profile image
-    `${tweet.includes.users[0].name} ([@${tweet.includes.users[0].username}](https://twitter.com/${tweet.includes.users[0].username}))`, // name and handle
+    `![${user.username}](${user.profile_image_url})`, // profile image
+    `${user.name} ([@${user.username}](https://twitter.com/${user.username}))`, // name and handle
     `\n`,
     `${text}` // text of the tweet
   ]
@@ -198,11 +236,62 @@ const buildMarkdown = (tweet, options) => {
   }
 
   if (tweet.includes.media) {
-    markdown = markdown.concat(createMediaElements(tweet.includes.media))
+    markdown = markdown.concat(createMediaElements(tweet.includes.media, options))
   }
 
   return frontmatter.concat(markdown).join('\n')
 }
+
+const downloadAssets = async (tweet, options) => {
+    let user = tweet.includes.users[0]
+    // determine path to download local assets
+    let localAssetPath = options.assetsPath ? options.assetsPath : './tweet-assets'
+    // create this directory if it doesn't yet exist
+    fsp.mkdir(localAssetPath, { recursive: true }).catch(error => {
+      panic(chalk`{red The path {bold {underline ${localAssetPath}}} is read-only.}`)
+    })
+
+    // grab a list of all files to download and their paths
+    let files = []
+    // add profile image to download list
+    files.push({
+      url: user.profile_image_url,
+      path: path.join(localAssetPath, `${user.username}-${user.id}.jpg`)
+    })
+
+    // add tweet images to download list
+    if (tweet.includes.media) {
+      tweet.includes.media.forEach(medium => {
+        switch (medium.type) {
+          case "photo":
+            files.push({
+              url: medium.url,
+              path: path.join(localAssetPath, `${medium.media_key}.jpg`)
+            })
+          default:
+            break
+        }
+      })
+    }
+
+    /**
+     * Filter out tweet assets that already exist locally.
+     * Array.filter() is only synchronous, so we can't use it here.
+     */
+    // Determine which assets do exist
+    let assetTests = await asyncMap(files, ({path}) => doesFileExist(path))
+    // Invert the test results to know which don't exist
+    assetTests = assetTests.map(result => !result)
+    // filter the list of assets to download
+    files = files.filter((_, index) => assetTests[index])
+
+    // Download missing assets
+    return Promise.all(files.map(file => downloadImage(file.url, file.path)))
+}
+
+const asyncMap = async (array, mutator) => Promise.all(array.map(element => mutator(element)))
+
+const doesFileExist = filepath => fsp.access(filepath, fs.constants.F_OK).then(_ => true).catch(_ => false)
 
 module.exports = {
   getTweetID,
@@ -213,5 +302,7 @@ module.exports = {
   createMediaElements,
   panic,
   testPath,
-  buildMarkdown
+  buildMarkdown,
+  asyncMap,
+  doesFileExist
 }
