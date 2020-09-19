@@ -97,7 +97,7 @@ If the file already exists, an error will be thrown unless you pass the `-f` (`-
 
 ### Custom File Path
 
-To save the tweet to a place other than the current directory, pass the location to the `-p` (`--path`) flag. This path must already exist or an error will be thrown.
+To save the tweet to a place other than the current directory, pass the location to the `-p` (`--path`) flag. If this path doesn't exist, it will be recursively created.
 
 ```bash
 ttm <tweet url> -p "./tweets/"

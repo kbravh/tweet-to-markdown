@@ -7,7 +7,7 @@ const fs = require(`fs`)
 const fsp = fs.promises
 const path = require(`path`)
 const util = require(`./util`)
-const log = console.log
+const log = console.info
 
 /**
  * The definitions of the command line flags
@@ -96,7 +96,7 @@ const writeTweet = async (tweet, markdown, options) => {
   filepath = path.format({ dir: filepath, base: filename })
 
   //check if file already exists
-  fsp.access(filepath, fs.constants.F_OK).then(_ => {
+  await fsp.access(filepath, fs.constants.F_OK).then(_ => {
     if (!options.force) {
       util.panic(chalk`{red File already exists.} Use {bold --force (-f)} to overwrite.`)
     }
