@@ -161,11 +161,9 @@ const createMediaElements = (media, options) => {
  * Tests if a path exists and if the user has write permission.
  * @param {String} path - the path to test for access
  */
-const testPath = async path => {
-  await fsp.mkdir(path, { recursive: true }).catch(error => {
+const testPath = async path => fsp.mkdir(path, { recursive: true }).catch(error => {
     panic(chalk`{red Unable to write to the path {bold {underline ${path}}}. Do you have write permission?}`)
   })
-}
 
 /**
  * Creates the entire Markdown string of the provided tweet
