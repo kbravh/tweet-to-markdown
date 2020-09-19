@@ -7,7 +7,7 @@ const fs = require(`fs`)
 const fsp = fs.promises
 const path = require(`path`)
 const util = require(`./util`)
-const log = console.log
+const log = console.info
 
 /**
  * The definitions of the command line flags
@@ -18,6 +18,8 @@ const optionDefinitions = [
   { name: `bearer`, alias: `b`, description: "The bearer token from the Twitter developer account to authenticate requests." },
   { name: `clipboard`, alias: `c`, type: Boolean, description: "Copy the generated markdown to the clipboard instead of saving a Markdown file." },
   { name: `path`, alias: `p`, description: "The path to save the file. This path must {italic already exist}. Defaults to the current directory." },
+  { name: `assets`, alias: `a`, type: Boolean, description: "Save tweet images locally instead of just a link."},
+  { name: `assets-path`, description: "The path to store the tweet images."},
   { name: `filename`, description: "The name of the markdown file to be saved. The .md extension will be automatically added. You can use the variables [[name]], [[handle]], and [[id]]." },
   { name: `force`, alias: `f`, type: Boolean, description: "Overwrite the file if it already exists." },
   { name: `metrics`, alias: `m`, type: Boolean, description: "Store the number of likes, tweets, and replies in the frontmatter of the document." },
@@ -44,7 +46,7 @@ const help = [
 ]
 
 // Parse the command line options and generate the help page
-const options = commandLineArgs(optionDefinitions)
+const options = commandLineArgs(optionDefinitions, {camelCase: true})
 const helpPage = commandLineUsage(help)
 
 /**
@@ -76,11 +78,11 @@ if (!bearer) {
 let id = util.getTweetID(options)
 
 /**
- * 
+ * Writes the tweet to a markdown file.
  * @param {tweet} tweet - The entire tweet object from the Twitter v2 API
  * @param {string} markdown - The markdown string to be written to the file
  */
-const writeTweet = async (tweet, markdown) => {
+const writeTweet = async (tweet, markdown, options) => {
   let filepath = ''
   // check if path provided by user is valid and writeable
   if (options.path) {
@@ -94,7 +96,7 @@ const writeTweet = async (tweet, markdown) => {
   filepath = path.format({ dir: filepath, base: filename })
 
   //check if file already exists
-  fsp.access(filepath, fs.constants.F_OK).then(_ => {
+  await fsp.access(filepath, fs.constants.F_OK).then(_ => {
     if (!options.force) {
       util.panic(chalk`{red File already exists.} Use {bold --force (-f)} to overwrite.`)
     }
@@ -111,11 +113,11 @@ const writeTweet = async (tweet, markdown) => {
 
 const main = async () => {
   let tweet = await util.getTweet(id, bearer)
-  let markdown = util.buildMarkdown(tweet, options)
+  let markdown = await util.buildMarkdown(tweet, options)
   if (options.clipboard) {
     util.copyToClipboard(markdown)
   } else {
-    writeTweet(tweet, markdown)
+    writeTweet(tweet, markdown, options)
   }
 }
 

@@ -63,7 +63,7 @@ To use this tool, you'll need to set up an application and get a bearer token on
 Grabbing a tweet is as easy as calling the `ttm` command and passing in the tweet URL.
 
 ```bash
-ttm --bearer <bearer token> https://twitter.com/JoshWComeau/status/1213870628895428611
+ttm -b <bearer token> https://twitter.com/JoshWComeau/status/1213870628895428611
 # Tweet saved as JoshWComeau - 1213870628895428611.md
 ```
 
@@ -97,10 +97,10 @@ If the file already exists, an error will be thrown unless you pass the `-f` (`-
 
 ### Custom File Path
 
-To save the tweet to a place other than the current directory, pass the location to the `-p` (`--path`) flag. This path must already exist or an error will be thrown.
+To save the tweet to a place other than the current directory, pass the location to the `-p` (`--path`) flag. If this path doesn't exist, it will be recursively created.
 
 ```bash
-ttm <tweet url> --path "./tweets/"
+ttm <tweet url> -p "./tweets/"
 # Tweet saved to ./tweets/JoshWComeau - 1213870628895428611.md
 ```
 
@@ -109,7 +109,7 @@ ttm <tweet url> --path "./tweets/"
 If you'd also like to record the number of likes, retweets, and replies the tweet has, pass the `-m` (`--metrics`) flag. This will save those numbers in the frontmatter of the file. 
 
 ```bash
-ttm <tweet url> --metrics
+ttm <tweet url> -m
 ```
 ```yaml
 ---
@@ -119,6 +119,20 @@ likes: 993
 retweets: 163
 replies: 24
 ---
+```
+
+### Save Images Locally
+
+Want to really capture the entire tweet locally? You can pass the `-a` (`--assets`) flag to download all the tweet images as well, instead of just linking to the images on the web. If the tweet is ever deleted or Twitter is unavailable, you'll still have your note.
+
+```bash
+ttm <tweet-url> -a
+```
+
+Tweet images will be automatically saved to `./tweet-assets`. If you'd like to save the assets to a custom directory, use the `--assets-path` flag and pass in the directory.
+
+```bash
+ttm <tweet-url> -a --assets-path "./images"
 ```
 
 
