@@ -58,7 +58,7 @@ const getTweetID = ({ src }) => {
 /**
  * Fetches a tweet object from the Twitter v2 API
  * @param {String} id - The ID of the tweet to fetch from the API
- * @param {String} bearer - The bearer token 
+ * @param {String} bearer - The bearer token
  */
 const getTweet = async (id, bearer) => {
   let twitterUrl = new URL(`https://api.twitter.com/2/tweets/${id}`)
@@ -122,6 +122,7 @@ const createPollTable = polls => {
 /**
  * Creates a filename based on the tweet and the user defined options.
  * @param {tweet} tweet - The entire tweet object from the Twitter v2 API
+ * @param {options} - The parsed command line arguments
  * @returns {String} - The filename based on tweet and options
  */
 const createFilename = (tweet, options) => {
@@ -136,20 +137,30 @@ const createFilename = (tweet, options) => {
 }
 
 /**
+ * Returns the local path to the asset, taking into account the path
+ * for the tweet itself so that the asset path is relative.
+ * @param {options} - The parsed command line arguments
+ * @returns {String} - The local asset path
+ */
+getLocalAssetPath = options => {
+  // If the user wants to download assets locally, we'll need to define the path
+  let localAssetPath = options.assetsPath ? options.assetsPath : './tweet-assets'
+  // we need the relative path to the assets from the notes
+  return path.relative(options.path ? options.path : `.`, localAssetPath)
+}
+
+/**
  * Creates media links to embed media into the markdown file
  * @param {media} media - The tweet media object provided by the Twitter v2 API
  * @returns {[]} - An array of markdown image links
  */
 const createMediaElements = (media, options) => {
-  // If the user wants to download assets locally, we'll need to define the path
-  let localAssetPath = options.assetsPath ? options.assetsPath : './tweet-assets'
-  // we need the relative path to the assets from the notes
-  let relativeAssetPath = path.relative(options.path ? options.path : `.`, localAssetPath)
+  let localAssetPath = getLocalAssetPath(options)
   return media.map(medium => {
     switch (medium.type) {
       case "photo":
-        return options.assets 
-        ? `\n![${medium.media_key}](${path.join(relativeAssetPath, `${medium.media_key}.jpg`)})`
+        return options.assets
+        ? `\n![${medium.media_key}](${path.join(localAssetPath, `${medium.media_key}.jpg`)})`
         : `\n![${medium.media_key}](${medium.url})`
       default:
         break
@@ -222,7 +233,7 @@ const buildMarkdown = async (tweet, options) => {
   }
 
   let markdown = [
-    `![${user.username}](${user.profile_image_url})`, // profile image
+    `![${user.username}](${options.assets ? path.join(getLocalAssetPath(options), `${user.username}-${user.id}.jpg`) : user.profile_image_url})`, // profile image
     `${user.name} ([@${user.username}](https://twitter.com/${user.username}))`, // name and handle
     `\n`,
     `${text}` // text of the tweet
@@ -246,7 +257,7 @@ const buildMarkdown = async (tweet, options) => {
 /**
  * Downloads all tweet images locally if they do not yet exist
  * @param {tweet} tweet - The entire tweet object from the twitter API
- * @param {options} options - The command line options 
+ * @param {options} options - The command line options
  */
 const downloadAssets = async (tweet, options) => {
     let user = tweet.includes.users[0]
