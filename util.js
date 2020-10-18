@@ -217,12 +217,13 @@ const buildMarkdown = async (tweet, options) => {
   }
 
   /**
-   * Define the frontmatter as the name and handle
+   * Define the frontmatter as the name, handle, and source url
    */
   let frontmatter = [
     `---`,
     `author: ${user.name}`,
     `handle: @${user.username}`,
+    `source: https://twitter.com/${user.username}/status/${tweet.data.id}`,
     ...metrics,
     `---`
   ]
