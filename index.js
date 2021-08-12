@@ -23,6 +23,7 @@ const optionDefinitions = [
   { name: `filename`, description: "The name of the markdown file to be saved. The .md extension will be automatically added. You can use the variables [[name]], [[handle]], and [[id]]." },
   { name: `force`, alias: `f`, type: Boolean, description: "Overwrite the file if it already exists." },
   { name: `metrics`, alias: `m`, type: Boolean, description: "Store the number of likes, tweets, and replies in the frontmatter of the document." },
+  { name: `quoted`, alias: `q`, type: Boolean, description: "Fetch and store quoted tweets in the document instead of just a link." },
 ]
 
 /**
@@ -64,17 +65,17 @@ if (!options.src) {
   util.panic(chalk`{red A tweet url or id was not provided.}\n{bold {underline Usage}}: ttm [options] <url or id>`)
 }
 
-// Pull 🐻 token first from options, then from environment variable
-let bearer = options.bearer || process.env.TWITTER_BEARER_TOKEN
+// pull 🐻 token first from options, then from environment variable
+if (!options.bearer) {
+  options.bearer = process.env.TWITTER_BEARER_TOKEN
+}
 
-/**
- * If no 🐻 token provided, panic
- */
-if (!bearer) {
+// if no 🐻 token provided, panic
+if (!options.bearer) {
   util.panic(chalk`{red No authorization provided.} You must provide your bearer token.`)
 }
 
-// extract tweet ID from URL ID
+// extract tweet ID from URL
 let id = util.getTweetID(options)
 
 /**
@@ -112,7 +113,7 @@ const writeTweet = async (tweet, markdown, options) => {
 }
 
 const main = async () => {
-  let tweet = await util.getTweet(id, bearer)
+  let tweet = await util.getTweet(id, options.bearer)
   let markdown = await util.buildMarkdown(tweet, options)
   if (options.clipboard) {
     util.copyToClipboard(markdown)

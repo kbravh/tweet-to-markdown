@@ -1,6 +1,7 @@
 <!-- PROJECT SHIELDS -->
 <!-- [![Contributors][contributors-shield]][contributors-url] -->
 <!-- [![Forks][forks-shield]][forks-url] -->
+
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
@@ -75,6 +76,16 @@ Any attached images, polls, and links will also be linked and displayed in the f
 
 ## Options
 
+There are *many* options to customize how this tool works. It is highly recommended to find the options you need and set up an alias in your terminal.
+
+For example on Mac or Linux, you can define an alias with your options like so:
+
+```bash
+alias ttm="ttm -p $HOME/notes --assets --quoted"
+```
+
+For Windows, have a look at [DOSKEY](https://superuser.com/a/560558).
+
 ### Copy to Clipboard
 
 What if you want to just copy the Markdown to the clipboard instead of saving to a file? Why, it's as simple as just passing the `-c` (`--clipboard`) flag.
@@ -106,11 +117,12 @@ ttm <tweet url> -p "./tweets/"
 
 ### Tweet Metrics
 
-If you'd also like to record the number of likes, retweets, and replies the tweet has, pass the `-m` (`--metrics`) flag. This will save those numbers in the frontmatter of the file. 
+If you'd also like to record the number of likes, retweets, and replies the tweet has, pass the `-m` (`--metrics`) flag. This will save those numbers in the frontmatter of the file.
 
 ```bash
 ttm <tweet url> -m
 ```
+
 ```yaml
 ---
 author: Josh ✨
@@ -119,6 +131,14 @@ likes: 993
 retweets: 163
 replies: 24
 ---
+```
+
+### Quoted tweets
+
+If you would like to include quoted tweets, pass the `-q` (`--quoted`) flag. This is disabled by default because a separate request has to be made to fetch the tweet.
+
+```bash
+ttm <tweet-url> -q
 ```
 
 ### Save Images Locally
@@ -135,6 +155,7 @@ Tweet images will be automatically saved to `./tweet-assets`. If you'd like to s
 ttm <tweet-url> -a --assets-path "./images"
 ```
 
+Nota bene: Unfortunately, there is currently not a way to save gifs or videos from tweets using the v2 API.
 
 <!-- CONTRIBUTING -->
 
@@ -161,6 +182,7 @@ Karey Higuera - [@kbravh](https://twitter.com/kbravh) - karey.higuera@gmail.com
 Project Link: [https://github.com/kbravh/tweet-to-markdown](https://github.com/kbravh/tweet-to-markdown)
 
 <!-- MARKDOWN LINKS -->
+
 [issues-shield]: https://img.shields.io/github/issues/kbravh/tweet-to-markdown.svg?style=flat-square
 [issues-url]: https://github.com/kbravh/tweet-to-markdown/issues
 [license-shield]: https://img.shields.io/github/license/kbravh/tweet-to-markdown.svg?style=flat-square
