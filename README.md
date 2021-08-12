@@ -5,7 +5,6 @@
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
 
 <br />
 <p align="center">
@@ -95,6 +94,23 @@ ttm -c https://twitter.com/JoshWComeau/status/1213870628895428611
 #Tweet copied to the clipboard.
 ```
 
+### Quoted tweets
+
+If you would like to include quoted tweets, pass the `-q` (`--quoted`) flag. This is disabled by default because a separate request has to be made to fetch the quoted tweet.
+
+```bash
+ttm <tweet url> -q
+```
+
+### Tweet threads
+To capture an entire tweet thread, use the `-t` (`--thread`) flag and pass the URL of the **last** tweet in the thread.
+
+Nota bene: this will make a separate network request for each tweet.
+
+```bash
+ttm <last tweet url> -t
+```
+
 ### Custom File Name
 
 In order to save the tweet with a custom filename, pass the desired name to the `--filename` flag. You can use the variables `[[name]]`, `[[handle]]`, and `[[id]]` in your filename, which will automatically be replaced. The file extension `.md` will also be added.
@@ -133,26 +149,18 @@ replies: 24
 ---
 ```
 
-### Quoted tweets
-
-If you would like to include quoted tweets, pass the `-q` (`--quoted`) flag. This is disabled by default because a separate request has to be made to fetch the tweet.
-
-```bash
-ttm <tweet-url> -q
-```
-
 ### Save Images Locally
 
 Want to really capture the entire tweet locally? You can pass the `-a` (`--assets`) flag to download all the tweet images as well, instead of just linking to the images on the web. If the tweet is ever deleted or Twitter is unavailable, you'll still have your note.
 
 ```bash
-ttm <tweet-url> -a
+ttm <tweet url> -a
 ```
 
 Tweet images will be automatically saved to `./tweet-assets`. If you'd like to save the assets to a custom directory, use the `--assets-path` flag and pass in the directory.
 
 ```bash
-ttm <tweet-url> -a --assets-path "./images"
+ttm <tweet url> -a --assets-path "./images"
 ```
 
 Nota bene: Unfortunately, there is currently not a way to save gifs or videos from tweets using the v2 API.

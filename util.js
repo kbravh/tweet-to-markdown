@@ -225,15 +225,12 @@ const buildMarkdown = async (tweet, options, type = 'normal') => {
     await downloadAssets(tweet, options);
   }
 
-  let markdown =
-    type === 'thread'
-      ? [`${text}`]
-      : [
-          `![${user.username}](${options.assets ? path.join(getLocalAssetPath(options), `${user.username}-${user.id}.jpg`) : user.profile_image_url})`, // profile image
-          `${user.name} ([@${user.username}](https://twitter.com/${user.username}))`, // name and handle
-          `\n`,
-          `${text}`, // text of the tweet
-        ];
+  let markdown = [
+    `![${user.username}](${options.assets ? path.join(getLocalAssetPath(options), `${user.username}-${user.id}.jpg`) : user.profile_image_url})`, // profile image
+    `${user.name} ([@${user.username}](https://twitter.com/${user.username}))`, // name and handle
+    `\n`,
+    `${text}`, // text of the tweet
+  ];
 
   // markdown requires 2 line breaks for actual new lines
   markdown = markdown.map((line) => line.replace(/\n/g, '\n\n'));
@@ -266,7 +263,7 @@ const buildMarkdown = async (tweet, options, type = 'normal') => {
   if (type === 'normal') {
     return frontmatter.concat(markdown).join('\n');
   } else {
-    return markdown.join('\n');
+    return "\n\n" + markdown.join('\n');
   }
 };
 
