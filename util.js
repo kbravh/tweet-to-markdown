@@ -12,7 +12,7 @@ axiosRetry(Axios, { retries: 3 });
 
 /**
  * Displays an error message to the user, then exits the program with a failure code.
- * @param {String} message - The error message to be displayed to the user
+ * @param {string} message - The error message to be displayed to the user
  */
 const panic = (message) => {
   log(message);
@@ -21,8 +21,8 @@ const panic = (message) => {
 
 /**
  * Download the remote image url to the local path.
- * @param {String} url - The remote image URL to download
- * @param {String} image_path - The local path to save the image
+ * @param {string} url - The remote image URL to download
+ * @param {string} image_path - The local path to save the image
  */
 const downloadImage = (url, image_path) =>
   Axios({
@@ -40,7 +40,7 @@ const downloadImage = (url, image_path) =>
 
 /**
  * Parses out the tweet ID from the URL or ID that the user provided
- * @param {options} options - The parsed command line arguments
+ * @param {Object} options - The parsed command line arguments
  */
 const getTweetID = ({ src }) => {
   let id;
@@ -57,8 +57,8 @@ const getTweetID = ({ src }) => {
 // fetch tweet from Twitter API
 /**
  * Fetches a tweet object from the Twitter v2 API
- * @param {String} id - The ID of the tweet to fetch from the API
- * @param {String} bearer - The bearer token
+ * @param {string} id - The ID of the tweet to fetch from the API
+ * @param {string} bearer - The bearer token
  */
 const getTweet = async (id, bearer) => {
   let twitterUrl = new URL(`https://api.twitter.com/2/tweets/${id}`);
@@ -96,7 +96,7 @@ const getTweet = async (id, bearer) => {
 
 /**
  * Copies the provided string to the clipboard.
- * @param {String} markdown - The markdown to be copied to the clipboard
+ * @param {string} markdown - The markdown to be copied to the clipboard
  */
 const copyToClipboard = async (markdown) => {
   await clipboard.write(markdown).catch((error) => {
@@ -106,9 +106,19 @@ const copyToClipboard = async (markdown) => {
 };
 
 /**
+ * A tweet poll
+ * @typedef {Object} Poll
+ * @property {string} id - The ID
+ * @property {Object[]} options - The poll choices
+ * @property {number} options.position - The rank of the choice
+ * @property {string} options.label - The text of the choice
+ * @property {number} options.votes - The number of votes the choice received
+*/
+
+/**
  * Creates markdown table to capture poll options and votes
- * @param {polls} polls - The polls object provided by the Twitter v2 API
- * @returns {String} - Markdown table as a string of the poll
+ * @param {Poll[]} polls - The polls array provided by the Twitter v2 API
+ * @returns {string} - Markdown table as a string of the poll
  */
 const createPollTable = (polls) => {
   return polls.map((poll) => {
@@ -119,10 +129,68 @@ const createPollTable = (polls) => {
 };
 
 /**
+ * A tweet
+ * @typedef {Object} Tweet
+ * @property {Object} includes - Attachments, users, and other data
+ * @property {Poll[]} includes.polls - The polls from the tweet
+ * @property {Object[]} includes.users - The tweet users
+ * @property {string} includes.users.name - The user's name
+ * @property {string} includes.users.id - The user's ID
+ * @property {string} includes.users.username - The user's username
+ * @property {string} includes.users.profile_image_url - The user's profile image url
+ * @property {Object[]} includes.media - The attached media objects
+ * @property {string} includes.media.media_key - The unique ID of the media object
+ * @property {("photo" | "gif" | "video")} includes.media.type - The type of attachment
+ * @property {string} includes.media.url - The URL of the media object
+ * @property {Object} data - Tweet metadata
+ * @property {Object} data.attachments - Attachment IDs
+ * @property {string[]} data.attachments.poll_ids - Poll IDs
+ * @property {string[]} data.attachments.media_keys - The IDs of the media objects
+ * @property {Object} data.public_metrics - Tweet metrics
+ * @property {number} data.public_metrics.retweet_count - The number of retweets
+ * @property {number} data.public_metrics.reply_count - The number of replies
+ * @property {number} data.public_metrics.like_count - The number of likes
+ * @property {number} data.public_metrics.quote_count - The number of quotes
+ * @property {string} data.id - The tweet id
+ * @property {string} data.text - The tweet text
+ * @property {string} data.author_id - The author's ID
+ * @property {Object} data.entities - Tags and links in the tweet
+ * @property {Object[]} data.entities.urls - URLs included in the tweet
+ * @property {number} data.entitites.urls.start - The starting index of the URL
+ * @property {number} data.entitites.urls.end - The ending index of the URL
+ * @property {string} data.entitites.urls.url - The shortened URL
+ * @property {string} data.entitites.urls.expanded_url - The full URL
+ * @property {string} data.entitites.urls.display_url - The displayed URL
+ * @property {Object[]} data.entities.mentions - Other users mentioned
+ * @property {string} data.entitites.mentions.start - The starting index of the mention
+ * @property {string} data.entitites.mentions.end - The ending index of the mention
+ * @property {string} data.entitites.mentions.username - The handle of the mention
+ * @property {Object[]} data.entities.annotations - Recognized objects in the tweet text
+ * @property {number} data.entities.annotations.start - The starting index of the annotation
+ * @property {number} data.entities.annotations.end - The ending index of the annotation
+ * @property {number} data.entities.annotations.probability - The probability of a correct annotation recognition
+ * @property {("Person" | "Place" | "Product" | "Organization" | "Other")} data.entities.annotations.type - The type of annotation
+ * @property {string} data.entities.annotations.normalized_text - The normalized title of the annotation
+ * @property {Object[]} data.entities.hashtags - The hashtags in the tweet
+ * @property {number} data.entities.hashtags.start - The starting index of the hashtag
+ * @property {number} data.entities.hashtags.end - The ending index of the hashtag
+ * @property {number} data.entities.hashtags.tag - The tag itself
+ * @property {Object[]} data.entities.cashtags - The cashtags in the tweet
+ * @property {number} data.entities.cashtags.start - The starting index of the cashtag
+ * @property {number} data.entities.cashtags.end - The ending index of the cashtag
+ * @property {number} data.entities.cashtags.tag - The tag itself
+ * @property {Object[]} data.referenced_tweets - Tweets referenced by this tweet
+ * @property {("quoted" | "replied_to")} data.referenced_tweets.type - The type of tweet reference
+ * @property {string} data.referenced_tweets.id - The referenced tweet's ID
+ * @property {string} data.author_id - The author's tweet
+ * @property {string} data.conversation_id - The ID of the first tweet in the conversation
+ */
+
+/**
  * Creates a filename based on the tweet and the user defined options.
- * @param {tweet} tweet - The entire tweet object from the Twitter v2 API
- * @param {options} - The parsed command line arguments
- * @returns {String} - The filename based on tweet and options
+ * @param {Tweet} tweet - The entire tweet object from the Twitter v2 API
+ * @param {Object} options - The parsed command line arguments
+ * @returns {string} - The filename based on tweet and options
  */
 const createFilename = (tweet, options) => {
   if (options.filename) {
@@ -138,8 +206,8 @@ const createFilename = (tweet, options) => {
 /**
  * Returns the local path to the asset, taking into account the path
  * for the tweet itself so that the asset path is relative.
- * @param {options} - The parsed command line arguments
- * @returns {String} - The local asset path
+ * @param {Object} options - The parsed command line arguments
+ * @returns {string} - The local asset path
  */
 getLocalAssetPath = (options) => {
   // If the user wants to download assets locally, we'll need to define the path
@@ -150,8 +218,8 @@ getLocalAssetPath = (options) => {
 
 /**
  * Creates media links to embed media into the markdown file
- * @param {media} media - The tweet media object provided by the Twitter v2 API
- * @returns {[]} - An array of markdown image links
+ * @param {Object} media - The tweet media object provided by the Twitter v2 API
+ * @returns {string[]} - An array of markdown image links
  */
 const createMediaElements = (media, options) => {
   let localAssetPath = getLocalAssetPath(options);
@@ -167,7 +235,7 @@ const createMediaElements = (media, options) => {
 
 /**
  * Tests if a path exists and if the user has write permission.
- * @param {String} path - the path to test for access
+ * @param {string} path - the path to test for access
  */
 const testPath = async (path) =>
   fsp.mkdir(path, { recursive: true }).catch((error) => {
@@ -176,10 +244,10 @@ const testPath = async (path) =>
 
 /**
  * Creates the entire Markdown string of the provided tweet
- * @param {tweet} tweet - The entire tweet object provided by the Twitter v2 API
- * @param {options} options - The parsed command line arguments
- * @param {string} type - Whether this is a normal, thread, or quoted tweet
- * @returns {String} - The Markdown string of the tweet
+ * @param {Tweet} tweet - The entire tweet object provided by the Twitter v2 API
+ * @param {Object} options - The parsed command line arguments
+ * @param {("normal" | "thread" | "quoted")} type - Whether this is a normal, thread, or quoted tweet
+ * @returns {string} - The Markdown string of the tweet
  */
 const buildMarkdown = async (tweet, options, type = 'normal') => {
   let metrics = [];
@@ -269,8 +337,8 @@ const buildMarkdown = async (tweet, options, type = 'normal') => {
 
 /**
  * Downloads all tweet images locally if they do not yet exist
- * @param {tweet} tweet - The entire tweet object from the twitter API
- * @param {options} options - The command line options
+ * @param {Tweet} tweet - The entire tweet object from the twitter API
+ * @param {Object} options - The command line options
  */
 const downloadAssets = async (tweet, options) => {
   let user = tweet.includes.users[0];
@@ -319,7 +387,7 @@ const downloadAssets = async (tweet, options) => {
 
 /**
  * An async version of the Array.map() function.
- * @param {[]} array - The array to be mapped over
+ * @param {*[]} array - The array to be mapped over
  * @param {Function} mutator - The function to apply to every array element
  * @returns {Promise} - A Promise that resolves to the mapped array values
  */
