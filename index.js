@@ -8,6 +8,7 @@ const fsp = fs.promises;
 const path = require(`path`);
 const util = require(`./util`);
 const log = console.info;
+const types = require('./types')
 
 /**
  * The definitions of the command line flags
@@ -80,7 +81,7 @@ let id = util.getTweetID(options);
 
 /**
  * Writes the tweet to a markdown file.
- * @param {tweet} tweet - The entire tweet object from the Twitter v2 API
+ * @param {types.Tweet} tweet - The entire tweet object from the Twitter v2 API
  * @param {string} markdown - The markdown string to be written to the file
  */
 const writeTweet = async (tweet, markdown, options) => {
