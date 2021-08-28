@@ -7,7 +7,7 @@ const path = require(`path`);
 const fsp = fs.promises;
 const chalk = require(`chalk`);
 const URL = require(`url`).URL;
-const types = require('./types')
+const types = require('./types');
 
 axiosRetry(Axios, { retries: 3 });
 
@@ -186,7 +186,11 @@ const testPath = async (path) =>
 const buildMarkdown = async (tweet, options, type = 'normal') => {
   let metrics = [];
   if (options.metrics) {
-    metrics = [`likes: ${tweet.data.public_metrics.like_count}`, `retweets: ${tweet.data.public_metrics.retweet_count}`, `replies: ${tweet.data.public_metrics.reply_count}`];
+    metrics = [
+      `likes: ${tweet.data.public_metrics.like_count}`,
+      `retweets: ${tweet.data.public_metrics.retweet_count}`,
+      `replies: ${tweet.data.public_metrics.reply_count}`
+    ];
   }
 
   let text = tweet.data.text;
@@ -220,7 +224,14 @@ const buildMarkdown = async (tweet, options, type = 'normal') => {
   /**
    * Define the frontmatter as the name, handle, and source url
    */
-  let frontmatter = [`---`, `author: ${user.name}`, `handle: @${user.username}`, `source: https://twitter.com/${user.username}/status/${tweet.data.id}`, ...metrics, `---`];
+  let frontmatter = [
+    `---`,
+    `author: "${user.name}"`,
+    `handle: "@${user.username}"`,
+    `source: "https://twitter.com/${user.username}/status/${tweet.data.id}"`,
+    ...metrics,
+    `---`
+  ];
 
   // if the user wants local assets, download them
   if (options.assets) {
@@ -265,7 +276,7 @@ const buildMarkdown = async (tweet, options, type = 'normal') => {
   if (type === 'normal') {
     return frontmatter.concat(markdown).join('\n');
   } else {
-    return "\n\n" + markdown.join('\n');
+    return '\n\n' + markdown.join('\n');
   }
 };
 
