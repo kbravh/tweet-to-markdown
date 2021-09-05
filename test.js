@@ -13,6 +13,14 @@ test(`extract tweet from url`, () => {
   const id = util.getTweetID({src: `https://twitter.com/JoshWComeau/status/1213870628895428611`})
   assert.strictEqual(id, `1213870628895428611`)
 })
+test(`extract tweet from url with query params`, () => {
+  const id = util.getTweetID({src: `https://twitter.com/JoshWComeau/status/1213870628895428611?s=20`})
+  assert.strictEqual(id, `1213870628895428611`)
+})
+test(`extract tweet from url with trailing slash`, () => {
+  const id = util.getTweetID({src: `https://twitter.com/JoshWComeau/status/1213870628895428611/`})
+  assert.strictEqual(id, `1213870628895428611`)
+})
 test(`return id`, () => {
   const id = util.getTweetID({src: `1213870628895428611`})
   assert.strictEqual(id, `1213870628895428611`)
