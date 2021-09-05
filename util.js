@@ -48,7 +48,10 @@ const getTweetID = ({ src }) => {
   try {
     // Create a URL object with the source. If it fails, it's not a URL.
     let url = new URL(src);
-    id = url.pathname.split('/').slice(-1)[0];
+    id = url.pathname
+      .split('/')
+      .filter(piece => !!piece) // remove enpty strings from array
+      .slice(-1)[0];
   } catch (error) {
     id = src;
   }
