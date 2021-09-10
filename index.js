@@ -95,7 +95,7 @@ const writeTweet = async (tweet, markdown, options) => {
   // create filename
   let filename = util.createFilename(tweet, options);
   // combine name and path
-  filepath = path.format({ dir: filepath, base: filename });
+  filepath = path.join(filepath, filename);
 
   //check if file already exists
   await fsp
