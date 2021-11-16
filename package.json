@@ -2,11 +2,12 @@
   "name": "tweet-to-markdown",
   "version": "1.4.4",
   "description": "Quickly save Tweets as Markdown files.",
-  "main": "index.js",
+  "main": "dist/main.js",
   "repository": "https://github.com/kbravh/tweet-to-markdown.git",
   "author": "Karey Higuera <karey.higuera@gmail.com>",
   "license": "MIT",
   "private": false,
+  "files": ["dist/main.js", "src/models.ts"],
   "keywords": [
     "tweet",
     "markdown",
@@ -14,12 +15,15 @@
     "md"
   ],
   "bin": {
-    "ttm": "index.js"
+    "ttm": "dist/main.js"
   },
   "scripts": {
-    "test": "node test.js"
+    "test": "node test.js",
+    "dev": "rollup --config rollup.config.js -w",
+    "build": "rollup --config rollup.config.js --environment BUILD:production"
   },
   "dependencies": {
+    "@types/baretest": "^2.0.0",
     "axios": "^0.21.1",
     "axios-retry": "^3.1.8",
     "chalk": "^4.1.0",
@@ -28,6 +32,19 @@
     "command-line-usage": "^6.1.0"
   },
   "devDependencies": {
-    "baretest": "^2.0.0"
+    "@rollup/plugin-commonjs": "^18.0.0",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^13.0.6",
+    "@rollup/plugin-typescript": "^8.2.1",
+    "@types/command-line-args": "^5.2.0",
+    "@types/command-line-usage": "^5.0.2",
+    "@types/node": "^14.14.37",
+    "@typescript-eslint/eslint-plugin": "^5.4.0",
+    "@typescript-eslint/parser": "^5.4.0",
+    "baretest": "^2.0.0",
+    "eslint": "^7.32.0",
+    "rollup": "^2.32.1",
+    "tslib": "^2.2.0",
+    "typescript": "^4.2.4"
   }
 }
