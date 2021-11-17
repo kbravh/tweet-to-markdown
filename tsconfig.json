@@ -10,8 +10,10 @@
     "moduleResolution": "node",
     "importHelpers": true,
     "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
     "useUnknownInCatchVariables": false,
+    "esModuleInterop": true,
     "lib": ["dom", "es5", "scripthost", "es2015"]
   },
-  "include": ["**/*.ts", "test.js"]
+  "include": ["**/*.ts", "src/test.ts", "mock/image_tweet.ts", "mock/mentions_tweet.ts", "src/test.mjs", "src/test.js"]
 }

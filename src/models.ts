@@ -18,7 +18,7 @@ export interface Data {
   public_metrics: Metrics
   entities?: Entities
   conversation_id?: string
-  attachments?: Attachment[]
+  attachments?: Attachment
   referenced_tweets?: ReferencedTweet[]
 }
 
@@ -41,8 +41,8 @@ export interface Media {
 }
 
 export interface Mention {
-  start: string
-  end: string
+  start: string | number
+  end: string | number
   username: string
 }
 
@@ -95,6 +95,17 @@ export interface TweetURL {
   url: string
   expanded_url: string
   display_url: string
+  unwound_url?: string
+  status?: number
+  title?: string
+  description?: string
+  images?: TweetUrlImage[]
+}
+
+export interface TweetUrlImage {
+  url: string
+  width: number
+  height: number
 }
 
 export interface User {

@@ -1,13 +1,16 @@
 {
   "name": "tweet-to-markdown",
-  "version": "1.4.4",
+  "version": "1.5.0",
   "description": "Quickly save Tweets as Markdown files.",
   "main": "dist/main.js",
   "repository": "https://github.com/kbravh/tweet-to-markdown.git",
   "author": "Karey Higuera <karey.higuera@gmail.com>",
   "license": "MIT",
   "private": false,
-  "files": ["dist/main.js", "src/models.ts"],
+  "files": [
+    "dist/main.js",
+    "src/models.ts"
+  ],
   "keywords": [
     "tweet",
     "markdown",
@@ -18,7 +21,7 @@
     "ttm": "dist/main.js"
   },
   "scripts": {
-    "test": "node test.js",
+    "test": "echo \"Implement some tests!\"",
     "dev": "rollup --config rollup.config.js -w",
     "build": "rollup --config rollup.config.js --environment BUILD:production"
   },
