@@ -56,7 +56,7 @@ const optionDefinitions: OptionDefinition[] = [
   {
     name: 'filename',
     description:
-      'The name of the markdown file to be saved. The .md extension will be automatically added. You can use the variables [[name]], [[handle]], and [[id]].',
+      'The name of the markdown file to be saved. The .md extension will be automatically added. You can use the variables [[name]], [[handle]], [[text]], and [[id]].',
   },
   {
     name: 'force',

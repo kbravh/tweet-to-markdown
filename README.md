@@ -113,7 +113,14 @@ ttm <last tweet url> -t
 
 ### Custom File Name
 
-In order to save the tweet with a custom filename, pass the desired name to the `--filename` flag. You can use the variables `[[name]]`, `[[handle]]`, and `[[id]]` in your filename, which will automatically be replaced. The file extension `.md` will also be added.
+In order to save the tweet with a custom filename, pass the desired name to the `--filename` flag. You can use the variables `[[name]]`, `[[handle]]`, `[[text]]`, and `[[id]]` in your filename, which will be replaced according to the following chart. The file extension `.md` will also be added automatically.
+
+| Variable | Replacement |
+|:---:|---|
+|[[handle]]|The user's handle (the part that follows the @ symbol)|
+|[[name]]|The user's name|
+|[[id]]|The unique ID assigned to the tweet|
+|[[text]]|The entire text of the tweet (truncated to fit OS filename length restrictions)|.
 
 ```bash
 ttm <tweet url> --filename "[[handle]] - Favicon versioning".

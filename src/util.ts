@@ -9,6 +9,7 @@ import chalk from 'chalk'
 import {Media, Poll, Tweet} from './models'
 import {CommandLineOptions} from 'command-line-args'
 import {URL} from 'url'
+import { unicodeSubstring } from './unicodeSubstring'
 
 axiosRetry(Axios, {retries: 3})
 
@@ -126,6 +127,46 @@ export const createPollTable = (polls: Poll[]): string[] => {
     return table.concat(options).join('\n')
   })
 }
+/**
+ * Truncate a string to a specified number of bytes
+ * @param string the string to truncate
+ * @param length the maximum length in bytes of the trimmed string
+ * @returns string
+ */
+ export const truncateBytewise = (string: string, length: number): string => {
+  const originalLength = length
+  while (new TextEncoder().encode(string).length > originalLength) {
+    string = unicodeSubstring(string, 0, length--)
+  }
+  return string
+}
+
+/**
+ * Filename sanitization. Credit: parshap/node-sanitize-filename
+ * Rewrite to allow functionality on Obsidian mobile.
+ */
+ const illegalRe = /[/?<>\\:*|"]/g
+ // eslint-disable-next-line no-control-regex
+ const controlRe = /[\x00-\x1f\x80-\x9f]/g
+ const reservedRe = /^\.+$/
+ const windowsReservedRe = /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i
+ const windowsTrailingRe = /[. ]+$/
+
+/**
+ * Sanitize a filename to remove any illegal characters.
+ * Also keeps the filename to 255 bytes or below.
+ * @param filename string
+ * @returns string
+ */
+ export const sanitizeFilename = (filename: string): string => {
+  filename = filename
+    .replace(illegalRe, '')
+    .replace(controlRe, '')
+    .replace(reservedRe, '')
+    .replace(windowsReservedRe, '')
+    .replace(windowsTrailingRe, '')
+  return truncateBytewise(filename, 252)
+}
 
 /**
  * Creates a filename based on the tweet and the user defined options.
@@ -137,14 +178,13 @@ export const createFilename = (
   tweet: Tweet,
   options: CommandLineOptions
 ): string => {
-  if (options.filename) {
-    let filename = `${options.filename}.md`
-    filename = filename.replace('[[name]]', tweet.includes.users[0].name)
-    filename = filename.replace('[[handle]]', tweet.includes.users[0].username)
-    filename = filename.replace('[[id]]', tweet.data.id)
-    return filename
-  }
-  return `${tweet.includes.users[0].username} - ${tweet.data.id}.md`
+  let filename: string = options.filename ? options.filename : '[[handle]] - [[id]]'
+  filename = filename.replace(/\.md$/, '') // remove md extension if provided
+  filename = filename.replace('[[name]]', tweet.includes.users[0].name)
+  filename = filename.replace('[[handle]]', tweet.includes.users[0].username)
+  filename = filename.replace('[[id]]', tweet.data.id)
+  filename = filename.replace('[[text]]', tweet.data.text)
+  return sanitizeFilename(filename) + '.md'
 }
 
 /**
