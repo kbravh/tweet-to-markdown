@@ -1,4 +1,4 @@
-import { default as Axios } from 'axios'
+import {default as Axios} from 'axios'
 import axiosRetry from 'axios-retry'
 import clipboard from 'clipboardy'
 const log = console.info
@@ -6,11 +6,11 @@ import fs from 'fs'
 import path from 'path'
 const fsp = fs.promises
 import chalk from 'chalk'
-import { Media, Poll, Tweet } from './models'
-import { CommandLineOptions } from 'command-line-args'
+import {Media, Poll, Tweet} from './models'
+import {CommandLineOptions} from 'command-line-args'
 import {URL} from 'url'
 
-axiosRetry(Axios, { retries: 3 })
+axiosRetry(Axios, {retries: 3})
 
 /**
  * Displays an error message to the user, then exits the program with a failure code.
@@ -31,20 +31,20 @@ export const downloadImage = (url: string, image_path: string): Promise<void> =>
     url,
     responseType: 'stream',
   }).then(
-    (response) =>
+    response =>
       new Promise((resolve, reject) => {
         response.data
           .pipe(fs.createWriteStream(image_path))
           .on('finish', () => resolve())
           .on('error', (e: Error) => reject(e))
-      }),
+      })
   )
 
 /**
  * Parses out the tweet ID from the URL or ID that the user provided
  * @param {CommandLineOptions} options - The parsed command line arguments
  */
-export const getTweetID = ({ src }: CommandLineOptions): string => {
+export const getTweetID = ({src}: CommandLineOptions): string => {
   let id
   try {
     // Create a URL object with the source. If it fails, it's not a URL.
@@ -71,7 +71,8 @@ export const getTweet = async (id: string, bearer: string): Promise<Tweet> => {
   const params = new URLSearchParams({
     expansions: 'author_id,attachments.poll_ids,attachments.media_keys',
     'user.fields': 'name,username,profile_image_url',
-    'tweet.fields': 'attachments,public_metrics,entities,conversation_id,referenced_tweets',
+    'tweet.fields':
+      'attachments,public_metrics,entities,conversation_id,referenced_tweets',
     'media.fields': 'url,alt_text',
     'poll.fields': 'options',
   })
@@ -79,17 +80,17 @@ export const getTweet = async (id: string, bearer: string): Promise<Tweet> => {
   return await Axios({
     method: 'GET',
     url: `${twitterUrl.href}?${params.toString()}`,
-    headers: { Authorization: `Bearer ${bearer}` },
+    headers: {Authorization: `Bearer ${bearer}`},
   })
-    .then((response) => response.data)
-    .then((tweet) => {
+    .then(response => response.data)
+    .then(tweet => {
       if (tweet.errors) {
         panic(chalk`{red ${tweet.errors[0].detail}}`)
       } else {
         return tweet
       }
     })
-    .catch((error) => {
+    .catch(error => {
       if (error.response) {
         panic(chalk.red(error.response.statusText))
       } else if (error.request) {
@@ -105,7 +106,7 @@ export const getTweet = async (id: string, bearer: string): Promise<Tweet> => {
  * @param {string} markdown - The markdown to be copied to the clipboard
  */
 export const copyToClipboard = async (markdown: string): Promise<void> => {
-  await clipboard.write(markdown).catch((error) => {
+  await clipboard.write(markdown).catch(error => {
     panic(chalk`{red There was a problem writing to the clipboard.}`)
   })
   log('Tweet copied to the clipboard.')
@@ -117,9 +118,11 @@ export const copyToClipboard = async (markdown: string): Promise<void> => {
  * @returns {string[]} - Array of Markdown tables as string of the poll
  */
 export const createPollTable = (polls: Poll[]): string[] => {
-  return polls.map((poll) => {
+  return polls.map(poll => {
     const table = ['\n|Option|Votes|', '|---|:---:|']
-    const options = poll.options.map((option) => `|${option.label}|${option.votes}|`)
+    const options = poll.options.map(
+      option => `|${option.label}|${option.votes}|`
+    )
     return table.concat(options).join('\n')
   })
 }
@@ -130,7 +133,10 @@ export const createPollTable = (polls: Poll[]): string[] => {
  * @param {CommandLineOptions} options - The parsed command line arguments
  * @returns {string} - The filename based on tweet and options
  */
-export const createFilename = (tweet: Tweet, options: CommandLineOptions): string => {
+export const createFilename = (
+  tweet: Tweet,
+  options: CommandLineOptions
+): string => {
   if (options.filename) {
     let filename = `${options.filename}.md`
     filename = filename.replace('[[name]]', tweet.includes.users[0].name)
@@ -149,7 +155,9 @@ export const createFilename = (tweet: Tweet, options: CommandLineOptions): strin
  */
 export const getLocalAssetPath = (options: CommandLineOptions): string => {
   // If the user wants to download assets locally, we'll need to define the path
-  const localAssetPath = options.assetsPath ? options.assetsPath : './tweet-assets'
+  const localAssetPath = options.assetsPath
+    ? options.assetsPath
+    : './tweet-assets'
   // we need the relative path to the assets from the notes
   return path.relative(options.path ? options.path : '.', localAssetPath)
 }
@@ -160,16 +168,22 @@ export const getLocalAssetPath = (options: CommandLineOptions): string => {
  * @param {CommandLineOptions} options - The parsed command line arguments
  * @returns {string[]} - An array of markdown image links
  */
-export const createMediaElements = (media: Media[], options: CommandLineOptions): string[] => {
+export const createMediaElements = (
+  media: Media[],
+  options: CommandLineOptions
+): string[] => {
   const localAssetPath = getLocalAssetPath(options)
-  return media.map((medium) => {
+  return media.map(medium => {
     switch (medium.type) {
-    case 'photo':
-      return options.assets ?
-        `\n![${medium.alt_text ?? medium.media_key}](${path.join(localAssetPath, `${medium.media_key}.jpg`)})` :
-        `\n![${medium.alt_text ?? medium.media_key}](${medium.url})`
-    default:
-      break
+      case 'photo':
+        return options.assets
+          ? `\n![${medium.alt_text ?? medium.media_key}](${path.join(
+              localAssetPath,
+              `${medium.media_key}.jpg`
+            )})`
+          : `\n![${medium.alt_text ?? medium.media_key}](${medium.url})`
+      default:
+        break
     }
   })
 }
@@ -179,8 +193,10 @@ export const createMediaElements = (media: Media[], options: CommandLineOptions)
  * @param {string} path - the path to test for access
  */
 export const testPath = async (path: string): Promise<string | void> =>
-  fsp.mkdir(path, { recursive: true }).catch((error) => {
-    panic(chalk`{red Unable to write to the path {bold {underline ${path}}}. Do you have write permission?}`)
+  fsp.mkdir(path, {recursive: true}).catch(error => {
+    panic(
+      chalk`{red Unable to write to the path {bold {underline ${path}}}. Do you have write permission?}`
+    )
   })
 
 /**
@@ -193,14 +209,14 @@ export const testPath = async (path: string): Promise<string | void> =>
 export const buildMarkdown = async (
   tweet: Tweet,
   options: CommandLineOptions,
-  type: ('normal' | 'thread' | 'quoted') = 'normal'
+  type: 'normal' | 'thread' | 'quoted' = 'normal'
 ): Promise<string> => {
   let metrics: string[] = []
   if (options.metrics) {
     metrics = [
       `likes: ${tweet.data.public_metrics.like_count}`,
       `retweets: ${tweet.data.public_metrics.retweet_count}`,
-      `replies: ${tweet.data.public_metrics.reply_count}`
+      `replies: ${tweet.data.public_metrics.reply_count}`,
     ]
   }
 
@@ -215,20 +231,32 @@ export const buildMarkdown = async (
      * replace any mentions, hashtags, cashtags, urls with links
      */
     tweet.data.entities.mentions &&
-      tweet.data.entities.mentions.forEach(({ username }) => {
-        text = text.replace(`@${username}`, `[@${username}](https://twitter.com/${username})`)
+      tweet.data.entities.mentions.forEach(({username}) => {
+        text = text.replace(
+          `@${username}`,
+          `[@${username}](https://twitter.com/${username})`
+        )
       })
     tweet.data.entities.hashtags &&
-      tweet.data.entities.hashtags.forEach(({ tag }) => {
-        text = text.replace(`#${tag}`, `[#${tag}](https://twitter.com/hashtag/${tag}) `)
+      tweet.data.entities.hashtags.forEach(({tag}) => {
+        text = text.replace(
+          `#${tag}`,
+          `[#${tag}](https://twitter.com/hashtag/${tag}) `
+        )
       })
     tweet.data.entities.cashtags &&
-      tweet.data.entities.cashtags.forEach(({ tag }) => {
-        text = text.replace(`$${tag}`, `[$${tag}](https://twitter.com/search?q=%24${tag})`)
+      tweet.data.entities.cashtags.forEach(({tag}) => {
+        text = text.replace(
+          `$${tag}`,
+          `[$${tag}](https://twitter.com/search?q=%24${tag})`
+        )
       })
     tweet.data.entities.urls &&
-      tweet.data.entities.urls.forEach((url) => {
-        text = text.replace(url.url, `[${url.display_url}](${url.expanded_url})`)
+      tweet.data.entities.urls.forEach(url => {
+        text = text.replace(
+          url.url,
+          `[${url.display_url}](${url.expanded_url})`
+        )
       })
   }
 
@@ -241,7 +269,7 @@ export const buildMarkdown = async (
     `handle: "@${user.username}"`,
     `source: "https://twitter.com/${user.username}/status/${tweet.data.id}"`,
     ...metrics,
-    '---'
+    '---',
   ]
 
   // if the user wants local assets, download them
@@ -250,14 +278,21 @@ export const buildMarkdown = async (
   }
 
   let markdown = [
-    `![${user.username}](${options.assets ? path.join(getLocalAssetPath(options), `${user.username}-${user.id}.jpg`) : user.profile_image_url})`, // profile image
+    `![${user.username}](${
+      options.assets
+        ? path.join(
+            getLocalAssetPath(options),
+            `${user.username}-${user.id}.jpg`
+          )
+        : user.profile_image_url
+    })`, // profile image
     `${user.name} ([@${user.username}](https://twitter.com/${user.username}))`, // name and handle
     '\n',
     `${text}`, // text of the tweet
   ]
 
   // markdown requires 2 line breaks for actual new lines
-  markdown = markdown.map((line) => line.replace(/\n/g, '\n\n'))
+  markdown = markdown.map(line => line.replace(/\n/g, '\n\n'))
 
   // Add in other tweet elements
   if (tweet.includes.polls) {
@@ -265,7 +300,9 @@ export const buildMarkdown = async (
   }
 
   if (tweet.includes.media) {
-    markdown = markdown.concat(createMediaElements(tweet.includes.media, options))
+    markdown = markdown.concat(
+      createMediaElements(tweet.includes.media, options)
+    )
   }
 
   // check for quoted tweets to be included
@@ -281,13 +318,18 @@ export const buildMarkdown = async (
 
   // indent all lines for a quoted tweet
   if (type === 'quoted') {
-    markdown = markdown.map((line) => '> ' + line)
+    markdown = markdown.map(line => '> ' + line)
   }
 
-  if (type === 'normal') {
-    return frontmatter.concat(markdown).join('\n')
-  } else {
-    return '\n\n' + markdown.join('\n')
+  switch (type) {
+    case 'normal':
+      return frontmatter.concat(markdown).join('\n')
+    case 'thread':
+      return '\n\n---\n\n' + markdown.join('\n')
+    case 'quoted':
+      return '\n\n' + markdown.join('\n')
+    default:
+      return '\n\n' + markdown.join('\n')
   }
 }
 
@@ -296,10 +338,15 @@ export const buildMarkdown = async (
  * @param {Tweet} tweet - The entire tweet object from the twitter API
  * @param {CommandLineOptions} options - The command line options
  */
-export const downloadAssets = async (tweet: Tweet, options: CommandLineOptions): Promise<void[]> => {
+export const downloadAssets = async (
+  tweet: Tweet,
+  options: CommandLineOptions
+): Promise<void[]> => {
   const user = tweet.includes.users[0]
   // determine path to download local assets
-  const localAssetPath = options.assetsPath ? options.assetsPath : './tweet-assets'
+  const localAssetPath = options.assetsPath
+    ? options.assetsPath
+    : './tweet-assets'
   // create this directory if it doesn't yet exist
   await testPath(localAssetPath)
 
@@ -313,16 +360,16 @@ export const downloadAssets = async (tweet: Tweet, options: CommandLineOptions):
 
   // add tweet images to download list
   if (tweet.includes.media) {
-    tweet.includes.media.forEach((medium) => {
+    tweet.includes.media.forEach(medium => {
       switch (medium.type) {
-      case 'photo':
-        files.push({
-          url: medium.url,
-          path: path.join(localAssetPath, `${medium.media_key}.jpg`),
-        })
-        break
-      default:
-        break
+        case 'photo':
+          files.push({
+            url: medium.url,
+            path: path.join(localAssetPath, `${medium.media_key}.jpg`),
+          })
+          break
+        default:
+          break
       }
     })
   }
@@ -332,14 +379,16 @@ export const downloadAssets = async (tweet: Tweet, options: CommandLineOptions):
    * Array.filter() is only synchronous, so we can't use it here.
    */
   // Determine which assets do exist
-  let assetTests = await asyncMap(files, ({ path }: {path: string}) => doesFileExist(path))
+  let assetTests = await asyncMap(files, ({path}: {path: string}) =>
+    doesFileExist(path)
+  )
   // Invert the test results to know which don't exist
-  assetTests = assetTests.map((result) => !result)
+  assetTests = assetTests.map(result => !result)
   // filter the list of assets to download
   files = files.filter((_, index) => assetTests[index])
 
   // Download missing assets
-  return Promise.all(files.map((file) => downloadImage(file.url, file.path)))
+  return Promise.all(files.map(file => downloadImage(file.url, file.path)))
 }
 
 /**
@@ -348,7 +397,10 @@ export const downloadAssets = async (tweet: Tweet, options: CommandLineOptions):
  * @param {Function} mutator - The function to apply to every array element
  * @returns {Promise<any[]>} - A Promise that resolves to the mapped array values
  */
-export const asyncMap = async (array: any[], mutator: Function): Promise<any[]> => Promise.all(array.map((element) => mutator(element)))
+export const asyncMap = async (
+  array: any[],
+  mutator: Function
+): Promise<any[]> => Promise.all(array.map(element => mutator(element)))
 
 /**
  * Determines if a file exists locally.
@@ -358,5 +410,5 @@ export const asyncMap = async (array: any[], mutator: Function): Promise<any[]> 
 export const doesFileExist = (filepath: string): Promise<boolean> =>
   fsp
     .access(filepath, fs.constants.F_OK)
-    .then((_) => true)
-    .catch((_) => false)
+    .then(_ => true)
+    .catch(_ => false)
