@@ -1,6 +1,6 @@
 {
   "name": "tweet-to-markdown",
-  "version": "1.7.1",
+  "version": "1.7.2",
   "description": "Quickly save Tweets as Markdown files.",
   "main": "dist/main.js",
   "repository": "https://github.com/kbravh/tweet-to-markdown.git",

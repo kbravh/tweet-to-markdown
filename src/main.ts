@@ -179,6 +179,9 @@ const writeTweet = async (
       //file does not exist so we can write to it
     })
 
+  // clean up excessive newlines
+  markdown = markdown.replace(/\n{2,}/g, '\n\n')
+
   // write the tweet to the file
   await fsp.writeFile(filepath, markdown).catch(error => {
     panic(error)
