@@ -102,6 +102,54 @@ export const getTweet = async (id: string, bearer: string): Promise<Tweet> => {
     })
 }
 
+
+/**
+ * Writes the tweet to a markdown file.
+ * @param {Tweet} tweet - The entire tweet object from the Twitter v2 API
+ * @param {string} markdown - The markdown string to be written to the file
+ * @param {CommandLineOptions} options - The parsed command line options
+ */
+ export const writeTweet = async (
+  tweet: Tweet,
+  markdown: string,
+  options: CommandLineOptions
+): Promise<void> => {
+  let filepath = ''
+  // check if path provided by user is valid and writeable
+  if (options.path) {
+    await testPath(options.path)
+    filepath = options.path
+  }
+
+  // create filename
+  const filename = createFilename(tweet, options)
+  // combine name and path
+  filepath = path.join(filepath, filename)
+
+  //check if file already exists
+  await fsp
+    .access(filepath, fs.constants.F_OK)
+    .then(_ => {
+      if (!options.force) {
+        panic(
+          chalk`{red File already exists.} Use {bold --force (-f)} to overwrite.`
+        )
+      }
+    })
+    .catch((error: Error) => {
+      //file does not exist so we can write to it
+    })
+
+  // clean up excessive newlines
+  markdown = markdown.replace(/\n{2,}/g, '\n\n')
+
+  // write the tweet to the file
+  await fsp.writeFile(filepath, markdown).catch(error => {
+    panic(error)
+  })
+  log(chalk`Tweet saved to {bold {underline ${filepath}}}`)
+}
+
 /**
  * Copies the provided string to the clipboard.
  * @param {string} markdown - The markdown to be copied to the clipboard
