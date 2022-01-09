@@ -60,9 +60,8 @@ export const getTweetID = ({src}: CommandLineOptions): string => {
   return id
 }
 
-// fetch tweet from Twitter API
 /**
- * Fetches a tweet object from the Twitter v2 API
+ * Fetches a tweet object
  * @param {string} id - The ID of the tweet to fetch from the API
  * @param {string} bearer - The bearer token
  * @returns {Promise<Tweet>} - The tweet from the Twitter API
@@ -74,6 +73,12 @@ export const getTweet = async (id: string, bearer: string): Promise<Tweet> => {
   return getTweetFromTwitter(id, bearer)
 }
 
+/**
+ * Fetches a tweet object from the Twitter v2 API
+ * @param {string} id - The ID of the tweet to fetch from the API
+ * @param {string} bearer - The bearer token
+ * @returns {Promise<Tweet>} - The tweet from the Twitter API
+ */
 const getTweetFromTwitter = async (
   id: string,
   bearer: string
@@ -112,6 +117,12 @@ const getTweetFromTwitter = async (
     })
 }
 
+/**
+ * Fetches a tweet object from the TTM service API
+ * @param {string} id - The ID of the tweet to fetch from the API
+ * @param {string} bearer - The bearer token
+ * @returns {Promise<Tweet>} - The tweet from the Twitter API
+ */
 const getTweetFromTTM = async (id: string, bearer: string): Promise<Tweet> => {
   const ttmUrl = new URL(`https://ttm.kbravh.dev/api/tweet`)
   const params = new URLSearchParams({
