@@ -1,4 +1,4 @@
-import {default as Axios} from 'axios'
+import {AxiosError, default as Axios} from 'axios'
 import axiosRetry from 'axios-retry'
 import clipboard from 'clipboardy'
 const log = console.info
@@ -8,8 +8,8 @@ const fsp = fs.promises
 import chalk from 'chalk'
 import {Media, Poll, Tweet} from './models'
 import {CommandLineOptions} from 'command-line-args'
-import {URL} from 'url'
-import { unicodeSubstring } from './unicodeSubstring'
+import {URL, URLSearchParams} from 'url'
+import {unicodeSubstring} from './unicodeSubstring'
 
 axiosRetry(Axios, {retries: 3})
 
@@ -68,6 +68,16 @@ export const getTweetID = ({src}: CommandLineOptions): string => {
  * @returns {Promise<Tweet>} - The tweet from the Twitter API
  */
 export const getTweet = async (id: string, bearer: string): Promise<Tweet> => {
+  if (bearer.startsWith('TTM>')) {
+    return getTweetFromTTM(id, bearer)
+  }
+  return getTweetFromTwitter(id, bearer)
+}
+
+const getTweetFromTwitter = async (
+  id: string,
+  bearer: string
+): Promise<Tweet> => {
   const twitterUrl = new URL(`https://api.twitter.com/2/tweets/${id}`)
   const params = new URLSearchParams({
     expansions: 'author_id,attachments.poll_ids,attachments.media_keys',
@@ -91,7 +101,7 @@ export const getTweet = async (id: string, bearer: string): Promise<Tweet> => {
         return tweet
       }
     })
-    .catch(error => {
+    .catch((error: AxiosError) => {
       if (error.response) {
         panic(chalk.red(error.response.statusText))
       } else if (error.request) {
@@ -102,6 +112,21 @@ export const getTweet = async (id: string, bearer: string): Promise<Tweet> => {
     })
 }
 
+const getTweetFromTTM = async (id: string, bearer: string): Promise<Tweet> => {
+  const ttmUrl = new URL(`https://ttm.kbravh.dev/api/tweet`)
+  const params = new URLSearchParams({
+    tweet: id,
+  })
+  return await Axios({
+    method: 'GET',
+    url: `${ttmUrl.href}?${params.toString()}`,
+    headers: {Authorization: `Bearer ${bearer}`},
+  })
+    .then(response => response.data)
+    .catch((error: AxiosError) => {
+      panic(chalk.red(error.response.statusText))
+    })
+}
 
 /**
  * Writes the tweet to a markdown file.
@@ -109,7 +134,7 @@ export const getTweet = async (id: string, bearer: string): Promise<Tweet> => {
  * @param {string} markdown - The markdown string to be written to the file
  * @param {CommandLineOptions} options - The parsed command line options
  */
- export const writeTweet = async (
+export const writeTweet = async (
   tweet: Tweet,
   markdown: string,
   options: CommandLineOptions
@@ -181,7 +206,7 @@ export const createPollTable = (polls: Poll[]): string[] => {
  * @param length the maximum length in bytes of the trimmed string
  * @returns string
  */
- export const truncateBytewise = (string: string, length: number): string => {
+export const truncateBytewise = (string: string, length: number): string => {
   const originalLength = length
   while (new TextEncoder().encode(string).length > originalLength) {
     string = unicodeSubstring(string, 0, length--)
@@ -193,12 +218,12 @@ export const createPollTable = (polls: Poll[]): string[] => {
  * Filename sanitization. Credit: parshap/node-sanitize-filename
  * Rewrite to allow functionality on Obsidian mobile.
  */
- const illegalRe = /[/?<>\\:*|"]/g
- // eslint-disable-next-line no-control-regex
- const controlRe = /[\x00-\x1f\x80-\x9f]/g
- const reservedRe = /^\.+$/
- const windowsReservedRe = /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i
- const windowsTrailingRe = /[. ]+$/
+const illegalRe = /[/?<>\\:*|"]/g
+// eslint-disable-next-line no-control-regex
+const controlRe = /[\x00-\x1f\x80-\x9f]/g
+const reservedRe = /^\.+$/
+const windowsReservedRe = /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i
+const windowsTrailingRe = /[. ]+$/
 
 /**
  * Sanitize a filename to remove any illegal characters.
@@ -206,7 +231,7 @@ export const createPollTable = (polls: Poll[]): string[] => {
  * @param filename string
  * @returns string
  */
- export const sanitizeFilename = (filename: string): string => {
+export const sanitizeFilename = (filename: string): string => {
   filename = filename
     .replace(illegalRe, '')
     .replace(controlRe, '')
@@ -226,7 +251,9 @@ export const createFilename = (
   tweet: Tweet,
   options: CommandLineOptions
 ): string => {
-  let filename: string = options.filename ? options.filename : '[[handle]] - [[id]]'
+  let filename: string = options.filename
+    ? options.filename
+    : '[[handle]] - [[id]]'
   filename = filename.replace(/\.md$/, '') // remove md extension if provided
   filename = filename.replace('[[name]]', tweet.includes.users[0].name)
   filename = filename.replace('[[handle]]', tweet.includes.users[0].username)
