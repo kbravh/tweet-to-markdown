@@ -126,7 +126,7 @@ if (!options.src) {
 
 // pull 🐻 token first from options, then from environment variable
 if (!options.bearer) {
-  options.bearer = process.env.TTM_BEARER_TOKEN ?? process.env.TWITTER_BEARER_TOKEN
+  options.bearer = process.env.TTM_API_KEY ?? process.env.TWITTER_BEARER_TOKEN
 }
 
 // if no 🐻 token provided, panic
