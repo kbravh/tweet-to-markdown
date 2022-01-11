@@ -2,6 +2,7 @@ import {default as Axios} from 'axios'
 import axiosRetry from 'axios-retry'
 import clipboard from 'clipboardy'
 const log = console.info
+import flatMap from 'array.prototype.flatmap'
 import fs from 'fs'
 import path from 'path'
 const fsp = fs.promises
@@ -331,8 +332,8 @@ export const buildMarkdown = async (
     `${text}`, // text of the tweet
   ]
 
-  // markdown requires 2 line breaks for actual new lines
-  markdown = markdown.map(line => line.replace(/\n/g, '\n\n'))
+  // remove newlines from within tweet text to avoid breaking our formatting
+  markdown = flatMap(markdown, line => line.split('\n'))
 
   // Add in other tweet elements
   if (tweet.includes.polls) {
