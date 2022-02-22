@@ -56,9 +56,21 @@ npx tweet-to-markdown
 
 <!-- USAGE EXAMPLES -->
 
-## Usage
+## Setup
 
-To use this tool, you'll need to set up an application and get a bearer token on the [Twitter developer dashboard](https://developer.twitter.com/en/portal/dashboard). Once you have the bearer token, either store it in the environment variable `TWITTER_BEARER_TOKEN` or pass it to the command line tool with the `-b` (`--bearer`) flag with each call.
+To use this tool, you have two options:
+- Sign up for a free API key from https://ttm.kbravh.dev (new in v2.0.0)
+- Sign up for a bearer token through the Twitter Developer dashboard
+
+Getting a free API key from https://ttm.kbravh.dev is the easiest method of using this plugin, as you won't have to go through Twitter's developer application process. Their application is tedious, and they don't always approve requests. However, you are more than welcome to follow the guide below to retrieve your own bearer token from Twitter. This will give you the most control, freedom, and security over your usage.
+
+### Free TTM API key
+You can sign up for a free API key at https://ttm.kbravh.dev by signing in with either your GitHub or Twitter account and heading to your account page. Once you sign in and retrieve your API key from your account page, either store it in the environment variable `TTM_API_KEY` or pass it to the command line tool with the `-b` (`--bearer`) flag with each call.
+
+### Twitter Developer bearer token
+To get a bearer token from Twitter, you'll need to set up an application on the [Twitter developer dashboard](https://developer.twitter.com/en/portal/dashboard). For a guide on doing so, see [Getting a bearer token](https://github.com/kbravh/obsidian-tweet-to-markdown/blob/main/BearerTokenGuide.md). Once you have the bearer token, either store it in the environment variable `TWITTER_BEARER_TOKEN` or pass it to the command line tool with the `-b` (`--bearer`) flag with each call.
+
+## Usage
 
 Grabbing a tweet is as easy as calling the `ttm` command and passing in the tweet URL.
 
