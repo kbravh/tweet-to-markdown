@@ -11,6 +11,7 @@ import {Media, Poll, Tweet} from './models'
 import {CommandLineOptions} from 'command-line-args'
 import {URL, URLSearchParams} from 'url'
 import {unicodeSubstring} from './unicodeSubstring'
+import { decode } from 'html-entities'
 
 axiosRetry(Axios, {retries: 3})
 
@@ -347,7 +348,7 @@ export const buildMarkdown = async (
     ]
   }
 
-  let text = tweet.data.text
+  let text = decode(tweet.data.text)
   const user = tweet.includes.users[0]
 
   /**
