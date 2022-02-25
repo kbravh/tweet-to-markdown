@@ -129,6 +129,7 @@ const getTweetFromTTM = async (id: string, bearer: string): Promise<Tweet> => {
   const ttmUrl = new URL(`https://ttm.kbravh.dev/api/tweet`)
   const params = new URLSearchParams({
     tweet: id,
+    source: 'cli'
   })
   return await Axios({
     method: 'GET',
