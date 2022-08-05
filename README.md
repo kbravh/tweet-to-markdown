@@ -75,7 +75,7 @@ To get a bearer token from Twitter, you'll need to set up an application on the 
 Grabbing a tweet is as easy as calling the `ttm` command and passing in the tweet URL.
 
 ```bash
-ttm -b <bearer token> https://twitter.com/JoshWComeau/status/1213870628895428611
+ttm -b "<bearer token>" https://twitter.com/JoshWComeau/status/1213870628895428611
 # Tweet saved as JoshWComeau - 1213870628895428611.md
 ```
 
