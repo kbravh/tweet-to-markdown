@@ -69,7 +69,7 @@ export const getTweetID = ({src}: CommandLineOptions): string => {
  * @returns {Promise<Tweet>} - The tweet from the Twitter API
  */
 export const getTweet = async (id: string, bearer: string): Promise<Tweet> => {
-  if (bearer.startsWith('TTM>')) {
+  if (bearer.startsWith('TTM')) {
     return getTweetFromTTM(id, bearer)
   }
   return getTweetFromTwitter(id, bearer)
