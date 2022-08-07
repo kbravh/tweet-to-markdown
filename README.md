@@ -36,7 +36,7 @@ This command line tool allows you to quickly save a tweet in Markdown format. Th
 
 ⚠ **You'll need to have Node.js of at least `v10.x` to use this tool.**
 
-You can install this CLI tool easily by running
+You can install this CLI tool by running
 
 ```bash
 yarn global add tweet-to-markdown
@@ -99,7 +99,7 @@ For Windows, have a look at [DOSKEY](https://superuser.com/a/560558).
 
 ### Copy to Clipboard
 
-What if you want to just copy the Markdown to the clipboard instead of saving to a file? Why, it's as simple as just passing the `-c` (`--clipboard`) flag.
+What if you want to just copy the Markdown to the clipboard instead of saving to a file? Just pass the `-c` (`--clipboard`) flag.
 
 ```bash
 ttm -c https://twitter.com/JoshWComeau/status/1213870628895428611

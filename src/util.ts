@@ -305,12 +305,13 @@ export const createMediaElements = (
   return media.map(medium => {
     switch (medium.type) {
       case 'photo':
+        const alt_text = medium.alt_text ? medium.alt_text.replace(/\n/g, ' ') : ''
         return options.assets
-          ? `\n![${medium.alt_text ?? medium.media_key}](${path.join(
+          ? `\n![${alt_text ?? medium.media_key}](${path.join(
               localAssetPath,
               `${medium.media_key}.jpg`
             )})`
-          : `\n![${medium.alt_text ?? medium.media_key}](${medium.url})`
+          : `\n![${alt_text ?? medium.media_key}](${medium.url})`
       default:
         break
     }
