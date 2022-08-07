@@ -11,6 +11,7 @@ import {
   writeTweet,
 } from './util'
 import {ReferencedTweet, Tweet} from './models'
+import axios from 'axios'
 const log = console.info
 
 /**
@@ -148,20 +149,49 @@ const id = getTweetID(options)
 
 const main = async () => {
   const tweets: Tweet[] = []
-  let currentTweet: Tweet = await getTweet(id, options.bearer)
-  tweets.push(currentTweet)
+  let error: Error
+  let currentTweet: Tweet
+  try {
+    currentTweet = await getTweet(id, options.bearer)
+  } catch (err) {
+    error = err
+  }
 
+  !error && tweets.push(currentTweet)
   // special handling for threads
   if (options.thread || options.condensedThread) {
     // check if this is the head tweet
-    while (currentTweet.data.conversation_id !== currentTweet.data.id) {
+    while (currentTweet?.data?.conversation_id !== currentTweet?.data?.id) {
       // load in parent tweet
       const [parent_tweet] = currentTweet.data.referenced_tweets.filter(
         (ref_tweet: ReferencedTweet) => ref_tweet.type === 'replied_to'
       )
-      currentTweet = await getTweet(parent_tweet.id, options.bearer)
+      try {
+        currentTweet = await getTweet(parent_tweet.id, options.bearer)
+      } catch (err) {
+        error = err
+        break
+      }
       tweets.push(currentTweet)
     }
+  }
+  if (error && !tweets.length) {
+    if (axios.isAxiosError(error)) {
+      if (error.response) {
+        panic(chalk.red(error.response.statusText))
+      } else if (error.request) {
+        panic(chalk.red('There seems to be a connection issue.'))
+      } else {
+        panic(chalk.red('An error occurred.'))
+      }
+    }
+    panic(chalk`{red Unfortunately, an error occurred:} ${error.message}`)
+  }
+
+  if (error && tweets.length) {
+    log(
+      chalk`{red An error occurred while downloading tweets.} I'll generate your markdown file with the information I did fetch.`
+    )
   }
   // reverse the thread so the tweets are in chronological order
   tweets.reverse()

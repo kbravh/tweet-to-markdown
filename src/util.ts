@@ -108,15 +108,6 @@ const getTweetFromTwitter = async (
         return tweet
       }
     })
-    .catch((error: AxiosError) => {
-      if (error.response) {
-        panic(chalk.red(error.response.statusText))
-      } else if (error.request) {
-        panic(chalk.red('There seems to be a connection issue.'))
-      } else {
-        panic(chalk.red('An error occurred.'))
-      }
-    })
 }
 
 /**
@@ -137,9 +128,6 @@ const getTweetFromTTM = async (id: string, bearer: string): Promise<Tweet> => {
     headers: {Authorization: `Bearer ${bearer}`},
   })
     .then(response => response.data)
-    .catch((error: AxiosError) => {
-      panic(chalk.red(error.response.statusText))
-    })
 }
 
 /**
