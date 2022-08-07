@@ -7,11 +7,11 @@ import fs from 'fs'
 import path from 'path'
 const fsp = fs.promises
 import chalk from 'chalk'
-import {Media, Poll, Tweet} from './models'
+import {Media, Poll, Tweet, User} from './models'
 import {CommandLineOptions} from 'command-line-args'
 import {URL, URLSearchParams} from 'url'
 import {unicodeSubstring} from './unicodeSubstring'
-import { decode } from 'html-entities'
+import {decode} from 'html-entities'
 
 axiosRetry(Axios, {retries: 3})
 
@@ -129,7 +129,7 @@ const getTweetFromTTM = async (id: string, bearer: string): Promise<Tweet> => {
   const ttmUrl = new URL(`https://ttm.kbravh.dev/api/tweet`)
   const params = new URLSearchParams({
     tweet: id,
-    source: 'cli'
+    source: 'cli',
   })
   return await Axios({
     method: 'GET',
@@ -305,12 +305,13 @@ export const createMediaElements = (
   return media.map(medium => {
     switch (medium.type) {
       case 'photo':
+        const alt_text = medium.alt_text ? medium.alt_text.replace(/\n/g, ' ') : ''
         return options.assets
-          ? `\n![${medium.alt_text ?? medium.media_key}](${path.join(
+          ? `\n![${alt_text ?? medium.media_key}](${path.join(
               localAssetPath,
               `${medium.media_key}.jpg`
             )})`
-          : `\n![${medium.alt_text ?? medium.media_key}](${medium.url})`
+          : `\n![${alt_text ?? medium.media_key}](${medium.url})`
       default:
         break
     }
@@ -338,8 +339,23 @@ export const testPath = async (path: string): Promise<string | void> =>
 export const buildMarkdown = async (
   tweet: Tweet,
   options: CommandLineOptions,
-  type: 'normal' | 'thread' | 'quoted' = 'normal'
+  type: 'normal' | 'thread' | 'quoted' = 'normal',
+  previousAuthor?: User
 ): Promise<string> => {
+  if (type === 'thread' && !previousAuthor) {
+    panic('A thread tweet must have a previous author')
+  }
+
+  let text = decode(tweet.data.text)
+  const user = tweet.includes.users[0]
+
+  const iscondensedThreadTweet = !(
+    type !== 'thread' ||
+    (type === 'thread' && !options.condensedThread)
+  )
+
+  const showAuthor = (iscondensedThreadTweet && user.id !== previousAuthor.id) || !iscondensedThreadTweet
+
   let metrics: string[] = []
   if (options.metrics) {
     metrics = [
@@ -348,9 +364,6 @@ export const buildMarkdown = async (
       `replies: ${tweet.data.public_metrics.reply_count}`,
     ]
   }
-
-  let text = decode(tweet.data.text)
-  const user = tweet.includes.users[0]
 
   /**
    * replace entities with markdown links
@@ -406,19 +419,24 @@ export const buildMarkdown = async (
     await downloadAssets(tweet, options)
   }
 
-  let markdown = [
-    `![${user.username}](${
-      options.assets
-        ? path.join(
-            getLocalAssetPath(options),
-            `${user.username}-${user.id}.jpg`
-          )
-        : user.profile_image_url
-    })`, // profile image
-    `${user.name} ([@${user.username}](https://twitter.com/${user.username}))`, // name and handle
-    '\n',
-    `${text}`, // text of the tweet
-  ]
+  let markdown = []
+  if (showAuthor) {
+    markdown.push(
+      `![${user.username}](${
+        options.assets
+          ? path.join(
+              getLocalAssetPath(options),
+              `${user.username}-${user.id}.jpg`
+            )
+          : user.profile_image_url
+      })`, // profile image
+      `${user.name} ([@${user.username}](https://twitter.com/${user.username}))`, // name and handle
+      '\n',
+      text
+    )
+  } else {
+    markdown.push(text)
+  }
 
   // remove newlines from within tweet text to avoid breaking our formatting
   markdown = flatMap(markdown, line => line.split('\n'))
@@ -450,17 +468,19 @@ export const buildMarkdown = async (
     markdown = markdown.map(line => '> ' + line)
   }
 
-  // add original tweet link to end of tweet
-  markdown.push(
-    '\n\n' +
-      `[Tweet link](https://twitter.com/${user.username}/status/${tweet.data.id})`
-  )
+  // add original tweet link to end of tweet if not a condensed thread
+  if (!options.condensedThread) {
+    markdown.push(
+      '\n\n' +
+        `[Tweet link](https://twitter.com/${user.username}/status/${tweet.data.id})`
+    )
+  }
 
   switch (type) {
     case 'normal':
       return frontmatter.concat(markdown).join('\n')
     case 'thread':
-      return '\n\n---\n\n' + markdown.join('\n')
+      return markdown.join('\n')
     case 'quoted':
       return '\n\n' + markdown.join('\n')
     default:
