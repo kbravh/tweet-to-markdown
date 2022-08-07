@@ -80,7 +80,14 @@ const optionDefinitions: OptionDefinition[] = [
     alias: 't',
     type: Boolean,
     description:
-      'Save an entire tweet thread (starting with the final tweet) in a single document.',
+      'Save an entire tweet thread in a single document. Use the link of the last tweet.',
+  },
+  {
+    name: 'condensed_thread',
+    alias: 'T',
+    type: Boolean,
+    description:
+      'Save an entire tweet thread in a single document, but only show the author on the first tweet or on author changes. Use the link of the last tweet.',
   },
 ]
 
@@ -140,29 +147,51 @@ if (!options.bearer) {
 const id = getTweetID(options)
 
 const main = async () => {
-  let tweet = await getTweet(id, options.bearer)
-  let final = ''
+  const tweets: Tweet[] = []
+  let currentTweet: Tweet = await getTweet(id, options.bearer)
+  tweets.push(currentTweet)
 
   // special handling for threads
-  if (options.thread) {
+  if (options.thread || options.condensedThread) {
     // check if this is the head tweet
-    while (tweet.data.conversation_id !== tweet.data.id) {
-      const markdown = await buildMarkdown(tweet, options, 'thread')
-      final = markdown + final
+    while (currentTweet.data.conversation_id !== currentTweet.data.id) {
       // load in parent tweet
-      const [parent_tweet] = tweet.data.referenced_tweets.filter(
+      const [parent_tweet] = currentTweet.data.referenced_tweets.filter(
         (ref_tweet: ReferencedTweet) => ref_tweet.type === 'replied_to'
       )
-      tweet = await getTweet(parent_tweet.id, options.bearer)
+      currentTweet = await getTweet(parent_tweet.id, options.bearer)
+      tweets.push(currentTweet)
     }
   }
-  const markdown = await buildMarkdown(tweet, options)
-  final = markdown + final
+  // reverse the thread so the tweets are in chronological order
+  tweets.reverse()
+  const markdowns = await Promise.all(
+    tweets.map(async (tweet, index) => {
+      return await buildMarkdown(
+        tweet,
+        options,
+        index === 0 ? 'normal' : 'thread',
+        index === 0 ? null : tweets[index - 1].includes.users[0]
+      )
+    })
+  )
+  const firstTweet = tweets[0]
+  if (options.condensedThread) {
+    markdowns.push(
+      '',
+      '',
+      `[Thread link](https://twitter.com/${firstTweet.includes.users[0].username}/status/${firstTweet.data.id})`
+    )
+  }
+
+  const final = options.condensedThread
+    ? markdowns.join('\n\n')
+    : markdowns.join('\n\n---\n\n')
 
   if (options.clipboard) {
     copyToClipboard(final)
   } else {
-    writeTweet(tweet, final, options)
+    writeTweet(firstTweet, final, options)
   }
 }
 

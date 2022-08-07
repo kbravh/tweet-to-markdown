@@ -123,6 +123,13 @@ Nota bene: this will make a separate network request for each tweet.
 ttm <last tweet url> -t
 ```
 
+#### Condensed threads
+Instead of showing complete, individual tweets with profile picture, date, etc. when downloading a thread, this option will show the header once and then only show the tweet bodies, representing tweet threads as a cohesive body of text. A header will be shown if a different author appears in the thread, for example if you're downloading a conversation between various authors.
+
+```bash
+ttm <last tweet url> -T
+```
+
 ### Custom File Name
 
 In order to save the tweet with a custom filename, pass the desired name to the `--filename` flag. You can use the variables `[[name]]`, `[[handle]]`, `[[text]]`, and `[[id]]` in your filename, which will be replaced according to the following chart. The file extension `.md` will also be added automatically.
