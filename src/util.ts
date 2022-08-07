@@ -126,8 +126,29 @@ const getTweetFromTTM = async (id: string, bearer: string): Promise<Tweet> => {
     method: 'GET',
     url: `${ttmUrl.href}?${params.toString()}`,
     headers: {Authorization: `Bearer ${bearer}`},
-  })
-    .then(response => response.data)
+  }).then(response => response.data)
+}
+
+export const logErrorToFile = async (error: Error | AxiosError): Promise<void> => {
+  let errorMessage: string
+  const stack = error.stack
+
+  // if Axios error, dig in a bit more
+  if (Axios.isAxiosError(error)) {
+    if (error.response) {
+      errorMessage = error.response.statusText
+    } else if (error.request) {
+      errorMessage = `There may be a connection error: ${error.message}`
+    }
+  }
+  errorMessage = errorMessage ?? error.message
+
+  try {
+    await fsp.appendFile('ttm.log', `${new Date().toISOString()}: ${errorMessage}`)
+    await fsp.appendFile('ttm.log', `${new Date().toISOString()}: ${stack}`)
+  } catch (error) {
+    log(`There was an error writing to the TTM log file: ${error.message}`);
+  }
 }
 
 /**
@@ -293,7 +314,9 @@ export const createMediaElements = (
   return media.map(medium => {
     switch (medium.type) {
       case 'photo':
-        const alt_text = medium.alt_text ? medium.alt_text.replace(/\n/g, ' ') : ''
+        const alt_text = medium.alt_text
+          ? medium.alt_text.replace(/\n/g, ' ')
+          : ''
         return options.assets
           ? `\n![${alt_text ?? medium.media_key}](${path.join(
               localAssetPath,
@@ -342,7 +365,9 @@ export const buildMarkdown = async (
     (type === 'thread' && !options.condensedThread)
   )
 
-  const showAuthor = (iscondensedThreadTweet && user.id !== previousAuthor.id) || !iscondensedThreadTweet
+  const showAuthor =
+    (iscondensedThreadTweet && user.id !== previousAuthor.id) ||
+    !iscondensedThreadTweet
 
   let metrics: string[] = []
   if (options.metrics) {

@@ -7,6 +7,7 @@ import {
   copyToClipboard,
   getTweet,
   getTweetID,
+  logErrorToFile,
   panic,
   writeTweet,
 } from './util'
@@ -175,6 +176,10 @@ const main = async () => {
       tweets.push(currentTweet)
     }
   }
+  if (error) {
+    await logErrorToFile(error)
+  }
+
   if (error && !tweets.length) {
     if (axios.isAxiosError(error)) {
       if (error.response) {
@@ -185,13 +190,16 @@ const main = async () => {
         panic(chalk.red('An error occurred.'))
       }
     }
-    panic(chalk`{red Unfortunately, an error occurred:} ${error.message}`)
+    panic(
+      chalk`{red Unfortunately, an error occurred.} See ttm.log in this directory file for details.`
+    )
   }
 
   if (error && tweets.length) {
     log(
       chalk`{red An error occurred while downloading tweets.} I'll generate your markdown file with the information I did fetch.`
     )
+    log('See ttm.log in this directory file for details.')
   }
   // reverse the thread so the tweets are in chronological order
   tweets.reverse()
