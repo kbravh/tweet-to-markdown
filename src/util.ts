@@ -1,7 +1,6 @@
 import {AxiosError, default as Axios} from 'axios'
 import axiosRetry from 'axios-retry'
 import clipboard from 'clipboardy'
-const log = console.info
 import flatMap from 'array.prototype.flatmap'
 import fs from 'fs'
 import path from 'path'
@@ -12,6 +11,8 @@ import {CommandLineOptions} from 'command-line-args'
 import {URL, URLSearchParams} from 'url'
 import {unicodeSubstring} from './unicodeSubstring'
 import {decode} from 'html-entities'
+
+export const log = console.info
 
 axiosRetry(Axios, {retries: 3})
 
@@ -58,6 +59,9 @@ export const getTweetID = ({src}: CommandLineOptions): string => {
       .slice(-1)[0]
   } catch (error) {
     id = src
+    if (typeof id !== 'string') {
+      panic(chalk`{red Could not determine tweet ID.}`)
+    }
   }
   return id
 }
@@ -129,25 +133,28 @@ const getTweetFromTTM = async (id: string, bearer: string): Promise<Tweet> => {
   }).then(response => response.data)
 }
 
-export const logErrorToFile = async (error: Error | AxiosError): Promise<void> => {
+export const generateErrorMessageFromError = (
+  error: Error | AxiosError
+): string => {
   let errorMessage: string
   const stack = error.stack
 
   // if Axios error, dig in a bit more
   if (Axios.isAxiosError(error)) {
     if (error.response) {
-      errorMessage = error.response.statusText
+      errorMessage = `${error.response.statusText}; ${error.response.data}`
     } else if (error.request) {
       errorMessage = `There may be a connection error: ${error.message}`
     }
   }
-  errorMessage = errorMessage ?? error.message
+  return `${errorMessage ?? error.message}\n${stack}`
+}
 
+export const logErrorToFile = async (error: string): Promise<void> => {
   try {
-    await fsp.appendFile('ttm.log', `${new Date().toISOString()}: ${errorMessage}`)
-    await fsp.appendFile('ttm.log', `${new Date().toISOString()}: ${stack}`)
+    await fsp.appendFile('ttm.log', `${new Date().toISOString()}: ${error}`)
   } catch (error) {
-    log(`There was an error writing to the TTM log file: ${error.message}`);
+    log(`There was an error writing to the TTM log file: ${error.message}`)
   }
 }
 
@@ -278,10 +285,13 @@ export const createFilename = (
     ? options.filename
     : '[[handle]] - [[id]]'
   filename = filename.replace(/\.md$/, '') // remove md extension if provided
-  filename = filename.replace('[[name]]', tweet.includes.users[0].name)
-  filename = filename.replace('[[handle]]', tweet.includes.users[0].username)
-  filename = filename.replace('[[id]]', tweet.data.id)
-  filename = filename.replace('[[text]]', tweet.data.text)
+  filename = filename.replace(/\[\[name\]\]/gi, tweet.includes.users[0].name)
+  filename = filename.replace(
+    /\[\[handle\]\]/gi,
+    tweet.includes.users[0].username
+  )
+  filename = filename.replace(/\[\[id\]\]/gi, tweet.data.id)
+  filename = filename.replace(/\[\[text\]\]/gi, tweet.data.text)
   return sanitizeFilename(filename) + '.md'
 }
 

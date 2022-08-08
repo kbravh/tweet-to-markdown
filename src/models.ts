@@ -14,6 +14,7 @@ export interface Attachment {
 export interface Data {
   id: string
   text: string
+  created_at: string
   author_id: string
   public_metrics: Metrics
   entities?: Entities
@@ -34,6 +35,12 @@ export interface Error {
   detail: string
 }
 
+export interface Includes {
+  polls?: Poll[]
+  users: User[]
+  media?: Media[]
+}
+
 export interface Media {
   media_key: string
   type: 'photo' | 'gif' | 'video'
@@ -42,9 +49,10 @@ export interface Media {
 }
 
 export interface Mention {
-  start: string | number
-  end: string | number
+  start: number
+  end: number
   username: string
+  id?: string
 }
 
 export interface Metrics {
@@ -52,6 +60,12 @@ export interface Metrics {
   reply_count: number
   like_count: number
   quote_count: number
+}
+
+export interface OpenGraphImage {
+  url: string
+  width: number
+  height: number
 }
 
 export interface Poll {
@@ -76,18 +90,13 @@ export interface Tag {
   tag: string
 }
 
-export interface Includes {
-  polls?: Poll[]
-  users: User[]
-  media?: Media[]
-}
-
 export interface Tweet {
   includes: Includes
   data: Data
   errors?: Error[]
   // other error fields
   reason?: string
+  status?: number
 }
 
 export interface TweetURL {
@@ -96,17 +105,12 @@ export interface TweetURL {
   url: string
   expanded_url: string
   display_url: string
-  unwound_url?: string
+  media_key?: string
+  images?: OpenGraphImage[]
   status?: number
   title?: string
   description?: string
-  images?: TweetUrlImage[]
-}
-
-export interface TweetUrlImage {
-  url: string
-  width: number
-  height: number
+  unwound_url?: string
 }
 
 export interface User {

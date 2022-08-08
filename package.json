@@ -21,7 +21,8 @@
     "ttm": "dist/main.js"
   },
   "scripts": {
-    "test": "echo \"Implement some tests!\"",
+    "test": "vitest",
+    "coverage": "vitest run --coverage",
     "dev": "rollup --config rollup.config.js -w",
     "build": "rollup --config rollup.config.js --environment BUILD:production"
   },
@@ -47,8 +48,11 @@
     "@typescript-eslint/eslint-plugin": "^5.4.0",
     "@typescript-eslint/parser": "^5.4.0",
     "eslint": "^7.32.0",
+    "msw": "^0.44.2",
     "rollup": "^2.32.1",
     "tslib": "^2.2.0",
-    "typescript": "^4.2.4"
+    "typescript": "^4.2.4",
+    "vite": "^3.0.4",
+    "vitest": "^0.21.0"
   }
 }
