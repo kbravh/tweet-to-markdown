@@ -1,7 +1,6 @@
 import {AxiosError, default as Axios} from 'axios'
 import axiosRetry from 'axios-retry'
 import clipboard from 'clipboardy'
-const log = console.info
 import flatMap from 'array.prototype.flatmap'
 import fs from 'fs'
 import path from 'path'
@@ -12,6 +11,8 @@ import {CommandLineOptions} from 'command-line-args'
 import {URL, URLSearchParams} from 'url'
 import {unicodeSubstring} from './unicodeSubstring'
 import {decode} from 'html-entities'
+
+export const log = console.info
 
 axiosRetry(Axios, {retries: 3})
 
@@ -58,6 +59,9 @@ export const getTweetID = ({src}: CommandLineOptions): string => {
       .slice(-1)[0]
   } catch (error) {
     id = src
+    if (typeof id !== 'string') {
+      panic(chalk`{red Could not determine tweet ID.}`)
+    }
   }
   return id
 }
@@ -108,15 +112,6 @@ const getTweetFromTwitter = async (
         return tweet
       }
     })
-    .catch((error: AxiosError) => {
-      if (error.response) {
-        panic(chalk.red(error.response.statusText))
-      } else if (error.request) {
-        panic(chalk.red('There seems to be a connection issue.'))
-      } else {
-        panic(chalk.red('An error occurred.'))
-      }
-    })
 }
 
 /**
@@ -135,11 +130,32 @@ const getTweetFromTTM = async (id: string, bearer: string): Promise<Tweet> => {
     method: 'GET',
     url: `${ttmUrl.href}?${params.toString()}`,
     headers: {Authorization: `Bearer ${bearer}`},
-  })
-    .then(response => response.data)
-    .catch((error: AxiosError) => {
-      panic(chalk.red(error.response.statusText))
-    })
+  }).then(response => response.data)
+}
+
+export const generateErrorMessageFromError = (
+  error: Error | AxiosError
+): string => {
+  let errorMessage: string
+  const stack = error.stack
+
+  // if Axios error, dig in a bit more
+  if (Axios.isAxiosError(error)) {
+    if (error.response) {
+      errorMessage = `${error.response.statusText}; ${error.response.data}`
+    } else if (error.request) {
+      errorMessage = `There may be a connection error: ${error.message}`
+    }
+  }
+  return `${errorMessage ?? error.message}\n${stack}`
+}
+
+export const logErrorToFile = async (error: string): Promise<void> => {
+  try {
+    await fsp.appendFile('ttm.log', `${new Date().toISOString()}: ${error}`)
+  } catch (error) {
+    log(`There was an error writing to the TTM log file: ${error.message}`)
+  }
 }
 
 /**
@@ -269,10 +285,13 @@ export const createFilename = (
     ? options.filename
     : '[[handle]] - [[id]]'
   filename = filename.replace(/\.md$/, '') // remove md extension if provided
-  filename = filename.replace('[[name]]', tweet.includes.users[0].name)
-  filename = filename.replace('[[handle]]', tweet.includes.users[0].username)
-  filename = filename.replace('[[id]]', tweet.data.id)
-  filename = filename.replace('[[text]]', tweet.data.text)
+  filename = filename.replace(/\[\[name\]\]/gi, tweet.includes.users[0].name)
+  filename = filename.replace(
+    /\[\[handle\]\]/gi,
+    tweet.includes.users[0].username
+  )
+  filename = filename.replace(/\[\[id\]\]/gi, tweet.data.id)
+  filename = filename.replace(/\[\[text\]\]/gi, tweet.data.text)
   return sanitizeFilename(filename) + '.md'
 }
 
@@ -305,7 +324,9 @@ export const createMediaElements = (
   return media.map(medium => {
     switch (medium.type) {
       case 'photo':
-        const alt_text = medium.alt_text ? medium.alt_text.replace(/\n/g, ' ') : ''
+        const alt_text = medium.alt_text
+          ? medium.alt_text.replace(/\n/g, ' ')
+          : ''
         return options.assets
           ? `\n![${alt_text ?? medium.media_key}](${path.join(
               localAssetPath,
@@ -354,7 +375,9 @@ export const buildMarkdown = async (
     (type === 'thread' && !options.condensedThread)
   )
 
-  const showAuthor = (iscondensedThreadTweet && user.id !== previousAuthor.id) || !iscondensedThreadTweet
+  const showAuthor =
+    (iscondensedThreadTweet && user.id !== previousAuthor.id) ||
+    !iscondensedThreadTweet
 
   let metrics: string[] = []
   if (options.metrics) {

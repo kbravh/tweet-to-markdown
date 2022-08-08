@@ -79,6 +79,8 @@ ttm -b "<bearer token>" https://twitter.com/JoshWComeau/status/12138706288954286
 # Tweet saved as JoshWComeau - 1213870628895428611.md
 ```
 
+Nota bene: If passing your bearer token as an argument instead of an environment variable, wrap your bearer token or API key in quotes to prevent any special symbols from being misinterpreted by the command line. Also, if using a TTM API key, be sure to include the entire key, from the `TTM` at the beginning all the way to the end with the alphanumeric characters (e.g. `"TTM>asdf1123"` or `"TTM_ghjk4567"`).
+
 The tweet will be saved to a Markdown file in the current directory. Here's how the tweet will look:
 
 ![Screenshot of the rendered Markdown file](images/tweet-markdown-screenshot.png)
