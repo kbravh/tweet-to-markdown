@@ -69,8 +69,8 @@ describe('Tweet construction functions', () => {
     expect(
       createMediaElements(imageTweet.includes.media, {assets: true})
     ).toStrictEqual([
-      '\n![](tweet-assets\\3_1292845624120025090.jpg)',
-      '\n![](tweet-assets\\3_1292845644567269376.jpg)',
+      '\n![](tweet-assets/3_1292845624120025090.jpg)',
+      '\n![](tweet-assets/3_1292845644567269376.jpg)',
     ])
   })
   it('Creates photo media elements with alt text', () => {

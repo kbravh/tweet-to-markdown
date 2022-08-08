@@ -198,14 +198,5 @@ Rasmus Andersson ([@rsms](https://twitter.com/rsms))
       options
     )
     expect(log).toBeCalled()
-    expect(logErrorToFile)
-      .toBeCalledWith(`Bad Request; Could not find tweet with id: [1543286531431059456].
-Error: Request failed with status code 400
-    at createError (C:\\Users\\karey\\projects\\tweet-to-markdown\\node_modules\\axios\\lib\\core\\createError.js:16:15)
-    at settle (C:\\Users\\karey\\projects\\tweet-to-markdown\\node_modules\\axios\\lib\\core\\settle.js:17:12)
-    at PassThrough.handleStreamEnd (C:\\Users\\karey\\projects\\tweet-to-markdown\\node_modules\\axios\\lib\\adapters\\http.js:269:11)
-    at PassThrough.emit (node:events:527:28)
-    at endReadableNT (node:internal/streams/readable:1345:12)
-    at processTicksAndRejections (node:internal/process/task_queues:83:21)`)
   })
 })
