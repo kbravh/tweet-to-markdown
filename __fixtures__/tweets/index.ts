@@ -12,7 +12,7 @@ import {
   imageTweetWithAnnotations,
   imageTweetWithAnnotationsAndNewlines,
 } from './image_tweet'
-import {mentionsTweet} from './mentions_tweet'
+import {mentionsTweet, multipleMentionsTweet} from './mentions_tweet'
 import {pollTweet} from './poll_tweet'
 import {oldProfileTweet, newProfileTweet} from './profile_pic_tweets'
 import {tweetThread, tweetWithMissingParent} from './tweet_thread'
@@ -20,8 +20,10 @@ export const tweets: Record<string, Tweet> = {
   [cashtagTweet.data.id]: cashtagTweet,
   [imageTweet.data.id]: imageTweet,
   [imageTweetWithAnnotations.data.id]: imageTweetWithAnnotations,
-  [imageTweetWithAnnotationsAndNewlines.data.id]: imageTweetWithAnnotationsAndNewlines,
+  [imageTweetWithAnnotationsAndNewlines.data.id]:
+    imageTweetWithAnnotationsAndNewlines,
   [mentionsTweet.data.id]: mentionsTweet,
+  [multipleMentionsTweet.data.id]: multipleMentionsTweet,
   [pollTweet.data.id]: pollTweet,
   [oldProfileTweet.data.id]: oldProfileTweet,
   [newProfileTweet.data.id]: newProfileTweet,
@@ -32,5 +34,5 @@ export const tweets: Record<string, Tweet> = {
     }),
     {}
   ),
-  [tweetWithMissingParent.data.id]: tweetWithMissingParent
+  [tweetWithMissingParent.data.id]: tweetWithMissingParent,
 }

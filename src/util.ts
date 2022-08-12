@@ -395,34 +395,54 @@ export const buildMarkdown = async (
     /**
      * replace any mentions, hashtags, cashtags, urls with links
      */
-    tweet.data.entities.mentions &&
-      tweet.data.entities.mentions.forEach(({username}) => {
-        text = text.replace(
-          `@${username}`,
-          `[@${username}](https://twitter.com/${username})`
-        )
-      })
-    tweet.data.entities.hashtags &&
-      tweet.data.entities.hashtags.forEach(({tag}) => {
-        text = text.replace(
-          `#${tag}`,
-          `[#${tag}](https://twitter.com/hashtag/${tag}) `
-        )
-      })
-    tweet.data.entities.cashtags &&
-      tweet.data.entities.cashtags.forEach(({tag}) => {
-        text = text.replace(
-          `$${tag}`,
-          `[$${tag}](https://twitter.com/search?q=%24${tag})`
-        )
-      })
-    tweet.data.entities.urls &&
-      tweet.data.entities.urls.forEach(url => {
-        text = text.replace(
-          url.url,
-          `[${url.display_url}](${url.expanded_url})`
-        )
-      })
+    const mentions = [
+      ...new Set(
+        (tweet.data.entities?.mentions ?? []).map(mention => mention.username)
+      ),
+    ]
+    const tags = [
+      ...new Set(
+        (tweet.data.entities?.hashtags ?? []).map(hashtag => hashtag.tag)
+      ),
+    ]
+    const cashtags = [
+      ...new Set(
+        (tweet.data.entities?.cashtags ?? []).map(cashtag => cashtag.tag)
+      ),
+    ]
+    const urlSet = new Set()
+    const urls = (tweet.data.entities?.urls ?? []).filter(url => {
+      if (urlSet.has(url.expanded_url)) {
+        return false
+      } else {
+        urlSet.add(url.expanded_url)
+        return true
+      }
+    })
+    mentions.forEach(username => {
+      text = text.replace(
+        new RegExp(`@${username}`, 'g'),
+        `[@${username}](https://twitter.com/${username})`
+      )
+    })
+    tags.forEach(tag => {
+      text = text.replace(
+        new RegExp(`#${tag}`, 'g'),
+        `[#${tag}](https://twitter.com/hashtag/${tag}) `
+      )
+    })
+    cashtags.forEach(tag => {
+      text = text.replace(
+        new RegExp(`$${tag}`, 'g'),
+        `[$${tag}](https://twitter.com/search?q=%24${tag})`
+      )
+    })
+    urls.forEach(url => {
+      text = text.replace(
+        new RegExp(url.url, 'g'),
+        `[${url.display_url}](${url.expanded_url})`
+      )
+    })
   }
 
   /**
