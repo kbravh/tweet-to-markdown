@@ -6,7 +6,7 @@ import fs from 'fs'
 import path from 'path'
 const fsp = fs.promises
 import chalk from 'chalk'
-import {Media, Poll, Tweet, User} from './models'
+import {Entities, Media, Poll, Tweet, User} from './models'
 import {CommandLineOptions} from 'command-line-args'
 import {URL, URLSearchParams} from 'url'
 import {unicodeSubstring} from './unicodeSubstring'
@@ -340,6 +340,55 @@ export const createMediaElements = (
 }
 
 /**
+ * replace any mentions, hashtags, cashtags, urls with links
+ */
+export const replaceEntities = (entities: Entities, text: string): string => {
+  const mentions = [
+    ...new Set((entities.mentions ?? []).map(mention => mention.username)),
+  ]
+  const tags = [
+    ...new Set((entities.hashtags ?? []).map(hashtag => hashtag.tag)),
+  ]
+  const cashtags = [
+    ...new Set((entities.cashtags ?? []).map(cashtag => cashtag.tag)),
+  ]
+  const urlSet = new Set()
+  const urls = (entities.urls ?? []).filter(url => {
+    if (urlSet.has(url.expanded_url)) {
+      return false
+    } else {
+      urlSet.add(url.expanded_url)
+      return true
+    }
+  })
+  mentions.forEach(username => {
+    text = text.replace(
+      new RegExp(`@${username}\\b`, 'g'),
+      `[@${username}](https://twitter.com/${username})`
+    )
+  })
+  tags.forEach(tag => {
+    text = text.replace(
+      new RegExp(`#${tag}\\b`, 'g'),
+      `[#${tag}](https://twitter.com/hashtag/${tag})`
+    )
+  })
+  cashtags.forEach(tag => {
+    text = text.replace(
+      new RegExp(`\\$${tag}\\b`, 'g'),
+      `[$${tag}](https://twitter.com/search?q=%24${tag})`
+    )
+  })
+  urls.forEach(url => {
+    text = text.replace(
+      new RegExp(url.url, 'g'),
+      `[${url.display_url}](${url.expanded_url})`
+    )
+  })
+  return text
+}
+
+/**
  * Tests if a path exists and if the user has write permission.
  * @param {string} path - the path to test for access
  */
@@ -392,57 +441,7 @@ export const buildMarkdown = async (
    * replace entities with markdown links
    */
   if (tweet.data.entities) {
-    /**
-     * replace any mentions, hashtags, cashtags, urls with links
-     */
-    const mentions = [
-      ...new Set(
-        (tweet.data.entities?.mentions ?? []).map(mention => mention.username)
-      ),
-    ]
-    const tags = [
-      ...new Set(
-        (tweet.data.entities?.hashtags ?? []).map(hashtag => hashtag.tag)
-      ),
-    ]
-    const cashtags = [
-      ...new Set(
-        (tweet.data.entities?.cashtags ?? []).map(cashtag => cashtag.tag)
-      ),
-    ]
-    const urlSet = new Set()
-    const urls = (tweet.data.entities?.urls ?? []).filter(url => {
-      if (urlSet.has(url.expanded_url)) {
-        return false
-      } else {
-        urlSet.add(url.expanded_url)
-        return true
-      }
-    })
-    mentions.forEach(username => {
-      text = text.replace(
-        new RegExp(`@${username}`, 'g'),
-        `[@${username}](https://twitter.com/${username})`
-      )
-    })
-    tags.forEach(tag => {
-      text = text.replace(
-        new RegExp(`#${tag}`, 'g'),
-        `[#${tag}](https://twitter.com/hashtag/${tag}) `
-      )
-    })
-    cashtags.forEach(tag => {
-      text = text.replace(
-        new RegExp(`$${tag}`, 'g'),
-        `[$${tag}](https://twitter.com/search?q=%24${tag})`
-      )
-    })
-    urls.forEach(url => {
-      text = text.replace(
-        new RegExp(url.url, 'g'),
-        `[${url.display_url}](${url.expanded_url})`
-      )
-    })
+    text = replaceEntities(tweet.data.entities, text)
   }
 
   /**

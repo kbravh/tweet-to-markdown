@@ -5,6 +5,7 @@ import {
   getLocalAssetPath,
   getTweet,
   getTweetID,
+  replaceEntities,
   sanitizeFilename,
   truncateBytewise,
 } from 'src/util'
@@ -16,6 +17,7 @@ import {
 } from '../__fixtures__/tweets'
 import {BEARER_TOKEN} from './consts'
 import {server} from 'src/mocks/server'
+import {platform} from 'os'
 
 describe('Tweet download functions', () => {
   it('Extracts tweet Id from regular URL', async () => {
@@ -68,10 +70,17 @@ describe('Tweet construction functions', () => {
   it('Creates photo media elements for local assets', () => {
     expect(
       createMediaElements(imageTweet.includes.media, {assets: true})
-    ).toStrictEqual([
-      '\n![](tweet-assets/3_1292845624120025090.jpg)',
-      '\n![](tweet-assets/3_1292845644567269376.jpg)',
-    ])
+    ).toStrictEqual(
+      platform() === 'win32'
+        ? [
+            '\n![](tweet-assets\\3_1292845624120025090.jpg)',
+            '\n![](tweet-assets\\3_1292845644567269376.jpg)',
+          ]
+        : [
+            '\n![](tweet-assets/3_1292845624120025090.jpg)',
+            '\n![](tweet-assets/3_1292845644567269376.jpg)',
+          ]
+    )
   })
   it('Creates photo media elements with alt text', () => {
     expect(
@@ -137,5 +146,53 @@ describe('File writing and path creation functions', () => {
   })
   it('Return custom asset path', () => {
     expect(getLocalAssetPath({assetsPath: 'assets'})).toBe('assets')
+  })
+})
+
+describe('Entity replacements', () => {
+  it('replaces hashtags without infixing substrings', () => {
+    expect(
+      replaceEntities(
+        {
+          hashtags: [
+            {start: 1, end: 2, tag: 'ab'},
+            {start: 5, end: 7, tag: 'abc'},
+          ],
+        },
+        "I'm a tweet with an #ab hashtag and an #abc hashtag."
+      )
+    ).toBe(
+      "I'm a tweet with an [#ab](https://twitter.com/hashtag/ab) hashtag and an [#abc](https://twitter.com/hashtag/abc) hashtag."
+    )
+  })
+  it('replaces cashtags without infixing substrings', () => {
+    expect(
+      replaceEntities(
+        {
+          cashtags: [
+            {start: 1, end: 2, tag: 'ab'},
+            {start: 5, end: 7, tag: 'abc'},
+          ],
+        },
+        "I'm a tweet with an $ab cashtag and an $abc cashtag."
+      )
+    ).toBe(
+      "I'm a tweet with an [$ab](https://twitter.com/search?q=%24ab) cashtag and an [$abc](https://twitter.com/search?q=%24abc) cashtag."
+    )
+  })
+  it('replaces mentions without infixing substrings', () => {
+    expect(
+      replaceEntities(
+        {
+          mentions: [
+            {start: 1, end: 2, username: 'ab'},
+            {start: 5, end: 7, username: 'abc'},
+          ],
+        },
+        "I'm a tweet with an @ab mention and an @abc mention."
+      )
+    ).toBe(
+      "I'm a tweet with an [@ab](https://twitter.com/ab) mention and an [@abc](https://twitter.com/abc) mention."
+    )
   })
 })
