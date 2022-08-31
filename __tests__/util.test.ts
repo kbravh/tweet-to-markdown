@@ -195,4 +195,42 @@ describe('Entity replacements', () => {
       "I'm a tweet with an [@ab](https://twitter.com/ab) mention and an [@abc](https://twitter.com/abc) mention."
     )
   })
+  it('Correctly replaces entities with CJK characters', () => {
+    expect(
+      replaceEntities(
+        {
+          hashtags: [
+            {start: 66, end: 70, tag: 'JiU'},
+            {start: 71, end: 74, tag: '지유'},
+            {start: 75, end: 88, tag: 'Dreamcatcher'},
+            {start: 89, end: 94, tag: '드림캐쳐'},
+          ],
+          urls: [
+            {
+              start: 95,
+              end: 118,
+              url: 'https://t.co/IRpqINac5X',
+              expanded_url:
+                'https://twitter.com/PaniclnTheCity/status/1564281755531722755/photo/1',
+              display_url: 'pic.twitter.com/IRpqINac5X',
+              media_key: '3_1564281751844884482',
+            },
+          ],
+        },
+        'A Minji a day keeps the bad vibes away~\n\nPlaying with our money \n\n#JiU #지유 #Dreamcatcher #드림캐쳐 https://t.co/IRpqINac5X'
+      )
+    ).toBe("A Minji a day keeps the bad vibes away~\n\nPlaying with our money \n\n[#JiU](https://twitter.com/hashtag/JiU) [#지유](https://twitter.com/hashtag/지유) [#Dreamcatcher](https://twitter.com/hashtag/Dreamcatcher) [#드림캐쳐](https://twitter.com/hashtag/드림캐쳐) [pic.twitter.com/IRpqINac5X](https://twitter.com/PaniclnTheCity/status/1564281755531722755/photo/1)")
+  })
+  it('Does not incorrectly split hashtags with CJK characters', () => {
+    expect(
+      replaceEntities(
+        {
+          hashtags: [
+            {start: 1, end: 2, tag: '드림'},
+            {start: 3, end: 6, tag: '드림캐쳐'},
+          ]
+        }, 'A tweet with a #드림 hashtag and a #드림캐쳐 hashtag.'
+      )
+    )
+  })
 })

@@ -363,19 +363,19 @@ export const replaceEntities = (entities: Entities, text: string): string => {
   })
   mentions.forEach(username => {
     text = text.replace(
-      new RegExp(`@${username}\\b`, 'g'),
+      new RegExp(`@${username}(?= |$)`, 'gm'),
       `[@${username}](https://twitter.com/${username})`
     )
   })
   tags.forEach(tag => {
     text = text.replace(
-      new RegExp(`#${tag}\\b`, 'g'),
+      new RegExp(`#${tag}(?= |$)`, 'gm'),
       `[#${tag}](https://twitter.com/hashtag/${tag})`
     )
   })
   cashtags.forEach(tag => {
     text = text.replace(
-      new RegExp(`\\$${tag}\\b`, 'g'),
+      new RegExp(`\\$${tag}(?= |$)`, 'gm'),
       `[$${tag}](https://twitter.com/search?q=%24${tag})`
     )
   })
