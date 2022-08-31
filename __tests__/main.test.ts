@@ -1,5 +1,5 @@
 import {server} from 'src/mocks/server'
-import {log, logErrorToFile, writeTweet} from '../src/util'
+import {log, writeTweet} from '../src/util'
 import {
   afterAll,
   afterEach,

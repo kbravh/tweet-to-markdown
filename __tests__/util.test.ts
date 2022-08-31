@@ -155,8 +155,8 @@ describe('Entity replacements', () => {
       replaceEntities(
         {
           hashtags: [
-            {start: 1, end: 2, tag: 'ab'},
-            {start: 5, end: 7, tag: 'abc'},
+            {start: 20, end: 23, tag: 'ab'},
+            {start: 39, end: 43, tag: 'abc'},
           ],
         },
         "I'm a tweet with an #ab hashtag and an #abc hashtag."
@@ -170,8 +170,8 @@ describe('Entity replacements', () => {
       replaceEntities(
         {
           cashtags: [
-            {start: 1, end: 2, tag: 'ab'},
-            {start: 5, end: 7, tag: 'abc'},
+            {start: 20, end: 23, tag: 'ab'},
+            {start: 39, end: 43, tag: 'abc'},
           ],
         },
         "I'm a tweet with an $ab cashtag and an $abc cashtag."
@@ -185,8 +185,8 @@ describe('Entity replacements', () => {
       replaceEntities(
         {
           mentions: [
-            {start: 1, end: 2, username: 'ab'},
-            {start: 5, end: 7, username: 'abc'},
+            {start: 20, end: 23, username: 'ab'},
+            {start: 39, end: 43, username: 'abc'},
           ],
         },
         "I'm a tweet with an @ab mention and an @abc mention."
