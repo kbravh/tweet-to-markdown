@@ -102,7 +102,12 @@ const help = [
 ]
 
 // Parse the command line options and generate the help page
-const options = commandLineArgs(optionDefinitions, {camelCase: true})
+let options: commandLineArgs.CommandLineOptions;
+try {
+  options = commandLineArgs(optionDefinitions, {camelCase: true})
+} catch (error) {
+  panic(chalk`{red ${error.message}}`);
+}
 const helpPage = commandLineUsage(help)
 
 /**
