@@ -31,6 +31,7 @@ export const processTweetRequest = async (
   }
 
   !error && tweets.push(currentTweet)
+  process.stdout.write(`Tweets downloaded: ${tweets.length}\r`)
   // special handling for threads
   if (options.thread || options.condensedThread) {
     // check if this is the head tweet
@@ -46,6 +47,7 @@ export const processTweetRequest = async (
         break
       }
       tweets.push(currentTweet)
+      process.stdout.write(`Tweets downloaded: ${tweets.length}\r`)
     }
   }
   if (error) {
