@@ -372,7 +372,7 @@ export const replaceEntities = (entities: Entities, text: string): string => {
     ...(entities?.cashtags ?? []).map(cashtag => ({
       ...cashtag,
       replacement: `[$${cashtag.tag}](https://twitter.com/search?q=%24${cashtag.tag})`,
-    }))
+    })),
     // Sort in reverse order
   ].sort((a, b) => b.start - a.start)
 
@@ -387,10 +387,11 @@ export const replaceEntities = (entities: Entities, text: string): string => {
   })
 
   for (const entity of allEntities) {
+    let chars = [...text]
     text =
-      text.substring(0, entity.start) +
+      chars.slice(0, entity.start).join('') +
       entity.replacement +
-      text.substring(entity.end)
+      chars.slice(entity.end).join('')
   }
 
   urls.forEach(url => {

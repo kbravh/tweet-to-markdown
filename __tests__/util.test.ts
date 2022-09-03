@@ -18,6 +18,7 @@ import {
 import {BEARER_TOKEN} from './consts'
 import {server} from 'src/mocks/server'
 import {platform} from 'os'
+import {emojiTweet} from '__fixtures__/tweets/emoji_tweets'
 
 describe('Tweet download functions', () => {
   it('Extracts tweet Id from regular URL', async () => {
@@ -219,7 +220,9 @@ describe('Entity replacements', () => {
         },
         'A Minji a day keeps the bad vibes away~\n\nPlaying with our money \n\n#JiU #지유 #Dreamcatcher #드림캐쳐 https://t.co/IRpqINac5X'
       )
-    ).toBe("A Minji a day keeps the bad vibes away~\n\nPlaying with our money \n\n[#JiU](https://twitter.com/hashtag/JiU) [#지유](https://twitter.com/hashtag/지유) [#Dreamcatcher](https://twitter.com/hashtag/Dreamcatcher) [#드림캐쳐](https://twitter.com/hashtag/드림캐쳐) [pic.twitter.com/IRpqINac5X](https://twitter.com/PaniclnTheCity/status/1564281755531722755/photo/1)")
+    ).toBe(
+      'A Minji a day keeps the bad vibes away~\n\nPlaying with our money \n\n[#JiU](https://twitter.com/hashtag/JiU) [#지유](https://twitter.com/hashtag/지유) [#Dreamcatcher](https://twitter.com/hashtag/Dreamcatcher) [#드림캐쳐](https://twitter.com/hashtag/드림캐쳐) [pic.twitter.com/IRpqINac5X](https://twitter.com/PaniclnTheCity/status/1564281755531722755/photo/1)'
+    )
   })
   it('Does not incorrectly split hashtags with CJK characters', () => {
     expect(
@@ -228,8 +231,9 @@ describe('Entity replacements', () => {
           hashtags: [
             {start: 1, end: 2, tag: '드림'},
             {start: 3, end: 6, tag: '드림캐쳐'},
-          ]
-        }, 'A tweet with a #드림 hashtag and a #드림캐쳐 hashtag.'
+          ],
+        },
+        'A tweet with a #드림 hashtag and a #드림캐쳐 hashtag.'
       )
     )
   })
