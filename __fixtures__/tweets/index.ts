@@ -7,7 +7,7 @@ export * from './tweet_thread'
 
 import {Tweet} from 'src/models'
 import {cashtagTweet} from './cashtag_tweet'
-import {koreanTweet} from './cjk_tweets'
+import {japaneseWithHTMLEntitiesTweet, koreanTweet} from './cjk_tweets'
 import {
   imageTweet,
   imageTweetWithAnnotations,
@@ -24,6 +24,7 @@ export const tweets: Record<string, Tweet> = {
   [imageTweetWithAnnotations.data.id]: imageTweetWithAnnotations,
   [imageTweetWithAnnotationsAndNewlines.data.id]:
     imageTweetWithAnnotationsAndNewlines,
+  [japaneseWithHTMLEntitiesTweet.data.id]: japaneseWithHTMLEntitiesTweet,
   [mentionsTweet.data.id]: mentionsTweet,
   [multipleMentionsTweet.data.id]: multipleMentionsTweet,
   [pollTweet.data.id]: pollTweet,

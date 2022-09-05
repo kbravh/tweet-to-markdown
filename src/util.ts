@@ -432,7 +432,17 @@ export const buildMarkdown = async (
     panic('A thread tweet must have a previous author')
   }
 
-  let text = decode(tweet.data.text)
+  let text = tweet.data.text
+
+  /**
+   * replace entities with markdown links
+   */
+  if (tweet.data.entities) {
+    text = replaceEntities(tweet.data.entities, text)
+  }
+
+  // Decode HTML entities
+  text = decode(text)
   const user = tweet.includes.users[0]
 
   const iscondensedThreadTweet = !(
@@ -451,13 +461,6 @@ export const buildMarkdown = async (
       `retweets: ${tweet.data.public_metrics.retweet_count}`,
       `replies: ${tweet.data.public_metrics.reply_count}`,
     ]
-  }
-
-  /**
-   * replace entities with markdown links
-   */
-  if (tweet.data.entities) {
-    text = replaceEntities(tweet.data.entities, text)
   }
 
   /**

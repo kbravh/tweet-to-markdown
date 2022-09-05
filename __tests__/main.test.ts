@@ -18,6 +18,7 @@ import {
   tweetWithMissingParent,
 } from '__fixtures__/tweets'
 import {BEARER_TOKEN} from './consts'
+import {japaneseWithHTMLEntitiesTweet} from '__fixtures__/tweets/cjk_tweets'
 
 vi.mock('../src/util', async () => {
   const original = await vi.importActual<typeof import('../src/util')>(
@@ -243,6 +244,32 @@ Edil Medeiros 🚢 ✏️🏴‍☠️ 🧩 ([@jose_edil](https://twitter.com/jo
 
 
 [Tweet link](https://twitter.com/jose_edil/status/1538271708918034433)`,
+      options
+    )
+  })
+  it('Properly renders tweet with CJK and HTML entities', async () => {
+    const options = {
+      bearer: BEARER_TOKEN,
+      src: japaneseWithHTMLEntitiesTweet.data.id,
+    }
+    await processTweetRequest(options)
+    expect(writeTweet).toBeCalledWith(
+      japaneseWithHTMLEntitiesTweet,
+      `---
+author: "Karey Higuera 🦈"
+handle: "@kbravh"
+source: "https://twitter.com/kbravh/status/1566771957646757889"
+---
+![kbravh](https://pbs.twimg.com/profile_images/1539402405506334721/1V5Xt64P_normal.jpg)
+Karey Higuera 🦈 ([@kbravh](https://twitter.com/kbravh))
+
+
+I've been working through some bugs on Tweet to Markdown regarding text parsing and [#hashtags](https://twitter.com/hashtag/hashtags), HTML entities (&,%, etc.), and CJK characters in hashtags ([#9月5日](https://twitter.com/hashtag/9月5日)).
+
+I never knew how poorly programming languages handled non-Latin characters 😕
+
+
+[Tweet link](https://twitter.com/kbravh/status/1566771957646757889)`,
       options
     )
   })

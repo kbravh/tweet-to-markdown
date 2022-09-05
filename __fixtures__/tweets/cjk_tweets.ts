@@ -71,3 +71,44 @@ export const koreanTweet: Tweet = {
     ],
   },
 }
+
+export const japaneseWithHTMLEntitiesTweet: Tweet = {
+  data: {
+    public_metrics: {
+      retweet_count: 0,
+      reply_count: 0,
+      like_count: 0,
+      quote_count: 0,
+    },
+    id: '1566771957646757889',
+    author_id: '1143604512999034881',
+    conversation_id: '1566771957646757889',
+    text: "I've been working through some bugs on Tweet to Markdown regarding text parsing and #hashtags, HTML entities (&amp;,%, etc.), and CJK characters in hashtags (#9月5日).\n\nI never knew how poorly programming languages handled non-Latin characters 😕",
+    created_at: '2022-09-05T12:55:18.000Z',
+    entities: {
+      hashtags: [
+        {
+          start: 84,
+          end: 93,
+          tag: 'hashtags',
+        },
+        {
+          start: 158,
+          end: 163,
+          tag: '9月5日',
+        },
+      ],
+    },
+  },
+  includes: {
+    users: [
+      {
+        profile_image_url:
+          'https://pbs.twimg.com/profile_images/1539402405506334721/1V5Xt64P_normal.jpg',
+        id: '1143604512999034881',
+        username: 'kbravh',
+        name: 'Karey Higuera 🦈',
+      },
+    ],
+  },
+}
