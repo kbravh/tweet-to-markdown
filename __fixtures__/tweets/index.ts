@@ -1,9 +1,12 @@
 export * from './cashtag_tweet'
+export * from './cjk_tweets'
+export * from './emoji_tweets'
 export * from './image_tweet'
 export * from './mentions_tweet'
 export * from './poll_tweet'
 export * from './profile_pic_tweets'
 export * from './tweet_thread'
+export * from './url_tweet'
 
 import {Tweet} from 'src/models'
 import {cashtagTweet} from './cashtag_tweet'
@@ -17,6 +20,7 @@ import {mentionsTweet, multipleMentionsTweet} from './mentions_tweet'
 import {pollTweet} from './poll_tweet'
 import {oldProfileTweet, newProfileTweet} from './profile_pic_tweets'
 import {tweetThread, tweetWithMissingParent} from './tweet_thread'
+import {singleUrlTweet} from './url_tweet'
 export const tweets: Record<string, Tweet> = {
   [cashtagTweet.data.id]: cashtagTweet,
   [koreanTweet.data.id]: koreanTweet,
@@ -37,5 +41,6 @@ export const tweets: Record<string, Tweet> = {
     }),
     {}
   ),
+  [singleUrlTweet.data.id]: singleUrlTweet,
   [tweetWithMissingParent.data.id]: tweetWithMissingParent,
 }

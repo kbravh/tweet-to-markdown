@@ -14,6 +14,7 @@ import {processTweetRequest} from 'src/process'
 import {
   imageTweet,
   multipleMentionsTweet,
+  singleUrlTweet,
   tweetThread,
   tweetWithMissingParent,
 } from '__fixtures__/tweets'
@@ -270,6 +271,33 @@ I never knew how poorly programming languages handled non-Latin characters 😕
 
 
 [Tweet link](https://twitter.com/kbravh/status/1566771957646757889)`,
+      options
+    )
+  })
+  it('Does not mangle urls with decoding', async () => {
+    const options = {
+      bearer: BEARER_TOKEN,
+      src: singleUrlTweet.data.id,
+    }
+    await processTweetRequest(options)
+    expect(writeTweet).toBeCalledWith(
+      singleUrlTweet,
+      `---
+author: "Tauri"
+handle: "@TauriApps"
+source: "https://twitter.com/TauriApps/status/1537347873565773824"
+---
+![TauriApps](https://pbs.twimg.com/profile_images/1427375984475578389/jWzgho1b_normal.png)
+Tauri ([@TauriApps](https://twitter.com/TauriApps))
+
+
+After 4 months of release candidates we're proud to release version 1.0 of Tauri! 🎉 Windows, Menus, System Trays, Auto Updater and much more are now at your fingertips!
+
+Check it out! ✨
+[tauri.app](https://tauri.app/)
+
+
+[Tweet link](https://twitter.com/TauriApps/status/1537347873565773824)`,
       options
     )
   })
