@@ -451,8 +451,9 @@ export const buildMarkdown = async (
   )
 
   const showAuthor =
-    (iscondensedThreadTweet && user.id !== previousAuthor.id) ||
-    !iscondensedThreadTweet
+    ((iscondensedThreadTweet && user.id !== previousAuthor.id) ||
+      !iscondensedThreadTweet) &&
+    !options.textOnly
 
   let metrics: string[] = []
   if (options.metrics) {
@@ -466,14 +467,16 @@ export const buildMarkdown = async (
   /**
    * Define the frontmatter as the name, handle, and source url
    */
-  const frontmatter = [
-    '---',
-    `author: "${user.name}"`,
-    `handle: "@${user.username}"`,
-    `source: "https://twitter.com/${user.username}/status/${tweet.data.id}"`,
-    ...metrics,
-    '---',
-  ]
+  const frontmatter = options.textOnly
+    ? []
+    : [
+        '---',
+        `author: "${user.name}"`,
+        `handle: "@${user.username}"`,
+        `source: "https://twitter.com/${user.username}/status/${tweet.data.id}"`,
+        ...metrics,
+        '---',
+      ]
 
   // if the user wants local assets, download them
   if (options.assets) {
@@ -530,7 +533,7 @@ export const buildMarkdown = async (
   }
 
   // add original tweet link to end of tweet if not a condensed thread
-  if (!options.condensedThread) {
+  if (!options.condensedThread && !options.textOnly) {
     markdown.push(
       '\n\n' +
         `[Tweet link](https://twitter.com/${user.username}/status/${tweet.data.id})`

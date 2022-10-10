@@ -301,4 +301,19 @@ Check it out! ✨
       options
     )
   })
+  it('Provides just the tweet text with textOnly option', async () => {
+    const options = {
+      bearer: BEARER_TOKEN,
+      src: singleUrlTweet.data.id,
+      textOnly: true,
+    }
+    await processTweetRequest(options)
+    expect(writeTweet).toBeCalledWith(
+      singleUrlTweet,
+      `After 4 months of release candidates we're proud to release version 1.0 of Tauri! 🎉 Windows, Menus, System Trays, Auto Updater and much more are now at your fingertips!
+
+Check it out! ✨
+[tauri.app](https://tauri.app/)`, options
+    )
+  })
 })
