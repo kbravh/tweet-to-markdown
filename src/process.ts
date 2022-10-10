@@ -88,7 +88,7 @@ export const processTweetRequest = async (
     })
   )
   const firstTweet = tweets[0]
-  if (options.condensedThread) {
+  if (options.condensedThread && !options.textOnly) {
     markdowns.push(
       '',
       '',

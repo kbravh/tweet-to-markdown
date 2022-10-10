@@ -132,6 +132,11 @@ Instead of showing complete, individual tweets with profile picture, date, etc. 
 ttm <last tweet url> -T
 ```
 
+### Text only
+With this flag, only the text of the tweet itself will be included. No author tags, frontmatter, or other information will be attached.
+
+Nota bene: This has not been tested well with threads. Please use at your own risk. Condensed threads may be a better fit for you.
+
 ### Custom File Name
 
 In order to save the tweet with a custom filename, pass the desired name to the `--filename` flag. You can use the variables `[[name]]`, `[[handle]]`, `[[text]]`, and `[[id]]` in your filename, which will be replaced according to the following chart. The file extension `.md` will also be added automatically.

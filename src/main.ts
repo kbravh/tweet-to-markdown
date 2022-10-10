@@ -80,6 +80,12 @@ const optionDefinitions: OptionDefinition[] = [
     description:
       'Save an entire tweet thread in a single document, but only show the author on the first tweet or on author changes. Use the link of the last tweet.',
   },
+  {
+    name: 'text_only',
+    alias: 'x',
+    type: Boolean,
+    description: 'Only save the text of the tweet, without author or any other metadata.'
+  }
 ]
 
 /**
