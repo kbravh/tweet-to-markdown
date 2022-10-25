@@ -1,8 +1,8 @@
 import commandLineArgs from 'command-line-args'
 import commandLineUsage, {OptionDefinition} from 'command-line-usage'
 import chalk from 'chalk'
-import { processTweetRequest } from './process'
-import { log, panic } from './util'
+import {processTweetRequest} from './process'
+import {log, panic} from './util'
 
 /**
  * The definitions of the command line flags
@@ -81,15 +81,24 @@ const optionDefinitions: OptionDefinition[] = [
       'Save an entire tweet thread in a single document, but only show the author on the first tweet or on author changes. Use the link of the last tweet.',
   },
   {
+    name: 'semicondensed_thread',
+    alias: 's',
+    type: Boolean,
+    description:
+      'Save an entire tweet thread in a single document, but only show the author on the first tweet or on author changes. Add a --- divider between tweets. Use the link of the last tweet.',
+  },
+  {
     name: 'text_only',
     alias: 'x',
     type: Boolean,
-    description: 'Only save the text of the tweet, without author or any other metadata.'
+    description:
+      'Only save the text of the tweet, without author or any other metadata.',
   },
   {
     name: 'date_locale',
-    description: 'The BCP 47 locale to use when displaying the date next to the author\'s name. E.g.: \'en-US\'. Defaults to your computer\'s locale.'
-  }
+    description:
+      "The BCP 47 locale to use when displaying the date next to the author's name. E.g.: 'en-US'. Defaults to your computer's locale.",
+  },
 ]
 
 /**
@@ -112,11 +121,11 @@ const help = [
 ]
 
 // Parse the command line options and generate the help page
-let options: commandLineArgs.CommandLineOptions;
+let options: commandLineArgs.CommandLineOptions
 try {
   options = commandLineArgs(optionDefinitions, {camelCase: true})
 } catch (error) {
-  panic(chalk`{red ${error.message}}`);
+  panic(chalk`{red ${error.message}}`)
 }
 const helpPage = commandLineUsage(help)
 

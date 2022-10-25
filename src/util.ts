@@ -464,7 +464,9 @@ export const buildMarkdown = async (
 
   const iscondensedThreadTweet = !(
     type !== 'thread' ||
-    (type === 'thread' && !options.condensedThread)
+    (type === 'thread' &&
+      !options.condensedThread &&
+      !options.semicondensedThread)
   )
 
   const showAuthor =
@@ -564,7 +566,10 @@ export const buildMarkdown = async (
   }
 
   // add original tweet link to end of tweet if not a condensed thread
-  if (!options.condensedThread && !options.textOnly) {
+  if (
+    !(options.condensedThread || options.semicondensedThread) &&
+    !options.textOnly
+  ) {
     markdown.push(
       '\n\n' +
         `[Tweet link](https://twitter.com/${user.username}/status/${tweet.data.id})`
