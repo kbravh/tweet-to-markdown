@@ -85,6 +85,10 @@ const optionDefinitions: OptionDefinition[] = [
     alias: 'x',
     type: Boolean,
     description: 'Only save the text of the tweet, without author or any other metadata.'
+  },
+  {
+    name: 'date_locale',
+    description: 'The BCP 47 locale to use when displaying the date next to the author\'s name. E.g.: \'en-US\'. Defaults to your computer\'s locale.'
   }
 ]
 

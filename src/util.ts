@@ -12,6 +12,7 @@ import {
   Mention,
   Poll,
   Tag,
+  TimestampFormat,
   Tweet,
   TweetURL,
   User,
@@ -415,6 +416,22 @@ export const testPath = async (path: string): Promise<string | void> =>
     )
   })
 
+export const formatTimestamp = (
+  timestamp: string,
+  timestampFormat: TimestampFormat
+): string =>
+  new Date(timestamp).toLocaleDateString(
+    timestampFormat.locale,
+    timestampFormat.format ?? {
+      day: 'numeric',
+      year: 'numeric',
+      month: 'long',
+      hour: 'numeric',
+      minute: 'numeric',
+      timeZoneName: 'short',
+    }
+  )
+
 /**
  * Creates the entire Markdown string of the provided tweet
  * @param {Tweet} tweet - The entire tweet object provided by the Twitter v2 API
@@ -464,6 +481,19 @@ export const buildMarkdown = async (
     ]
   }
 
+  const isoDate = new Date(tweet.data.created_at).toISOString()
+
+  const date = formatTimestamp(tweet.data.created_at, {
+    locale: options.dateLocale,
+    format: {
+      day: 'numeric',
+      year: 'numeric',
+      month: 'long',
+      hour: 'numeric',
+      minute: 'numeric',
+    },
+  })
+
   /**
    * Define the frontmatter as the name, handle, and source url
    */
@@ -474,6 +504,7 @@ export const buildMarkdown = async (
         `author: "${user.name}"`,
         `handle: "@${user.username}"`,
         `source: "https://twitter.com/${user.username}/status/${tweet.data.id}"`,
+        `date: ${isoDate}`,
         ...metrics,
         '---',
       ]
@@ -494,7 +525,7 @@ export const buildMarkdown = async (
             )
           : user.profile_image_url
       })`, // profile image
-      `${user.name} ([@${user.username}](https://twitter.com/${user.username}))`, // name and handle
+      `${user.name} ([@${user.username}](https://twitter.com/${user.username})) - ${date}`, // name and handle
       '\n',
       text
     )

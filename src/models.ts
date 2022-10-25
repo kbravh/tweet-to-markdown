@@ -119,3 +119,8 @@ export interface User {
   username: string
   profile_image_url: string
 }
+
+export type TimestampFormat = {
+  locale: string
+  format?: Intl.DateTimeFormatOptions
+}
