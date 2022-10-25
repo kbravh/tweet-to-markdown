@@ -33,7 +33,11 @@ export const processTweetRequest = async (
   !error && tweets.push(currentTweet)
   process.stdout.write(`Tweets downloaded: ${tweets.length}\r`)
   // special handling for threads
-  if (options.thread || options.condensedThread) {
+  if (
+    options.thread ||
+    options.condensedThread ||
+    options.semicondensedThread
+  ) {
     // check if this is the head tweet
     while (currentTweet?.data?.conversation_id !== currentTweet?.data?.id) {
       // load in parent tweet
@@ -88,17 +92,19 @@ export const processTweetRequest = async (
     })
   )
   const firstTweet = tweets[0]
-  if (options.condensedThread && !options.textOnly) {
+  if (
+    (options.condensedThread || options.semicondensedThread) &&
+    !options.textOnly
+  ) {
     markdowns.push(
-      '',
-      '',
-      `[Thread link](https://twitter.com/${firstTweet.includes.users[0].username}/status/${firstTweet.data.id})`
+      `\n\n[Thread link](https://twitter.com/${firstTweet.includes.users[0].username}/status/${firstTweet.data.id})`
     )
   }
 
-  const final = options.condensedThread
-    ? markdowns.join('\n\n')
-    : markdowns.join('\n\n---\n\n')
+  const final =
+    options.condensedThread
+      ? markdowns.join('\n\n')
+      : markdowns.join('\n\n---\n\n')
 
   if (options.clipboard) {
     copyToClipboard(final)

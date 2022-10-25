@@ -132,6 +132,13 @@ Instead of showing complete, individual tweets with profile picture, date, etc. 
 ttm <last tweet url> -T
 ```
 
+#### Semicondensed threads
+These follow the same rules as condensed threads, but each tweet will still be separated by `---`.
+
+```bash
+ttm <last tweet url> -s
+```
+
 ### Text only
 With this flag, only the text of the tweet itself will be included. No author tags, frontmatter, or other information will be attached.
 
