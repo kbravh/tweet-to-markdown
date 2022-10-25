@@ -34,7 +34,7 @@ This command line tool allows you to quickly save a tweet in Markdown format. Th
 
 ## Installing
 
-⚠ **You'll need to have Node.js of at least `v10.x` to use this tool.**
+⚠ **You'll need to have Node.js of at least `v12.x` to use this tool.**
 
 You can install this CLI tool by running
 
@@ -197,6 +197,20 @@ ttm <tweet url> -a --assets-path "./images"
 ```
 
 Nota bene: Unfortunately, there is currently not a way to save gifs or videos from tweets using the v2 API.
+
+### Date locale
+
+Using the `--date_locale` option, you can pass a BCP 47 language code to have the date displayed in a specific locale. If you don't pass this option (or if you're using lower than Node 13), your computer's default locale will be used.
+
+Finding a complete list of these language codes is difficult, but here's a short list of examples:
+| Tag | Language |
+| --- | --- |
+| en | English |
+| en-US | American English |
+| es-MX | Mexican Spanish |
+| ta-IN | Indian Tamil |
+
+A more complete list can be found here: https://gist.github.com/typpo/b2b828a35e683b9bf8db91b5404f1bd1
 
 <!-- CONTRIBUTING -->
 
