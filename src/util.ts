@@ -565,7 +565,7 @@ export const buildMarkdown = async (
     markdown = markdown.map(line => '> ' + line)
   }
 
-  // add original tweet link to end of tweet if not a condensed thread
+  // add original tweet link and Thread Reader App link to end of tweet if not a condensed thread
   if (
     !(options.condensedThread || options.semicondensedThread) &&
     !options.textOnly
@@ -573,6 +573,10 @@ export const buildMarkdown = async (
     markdown.push(
       '\n\n' +
         `[Tweet link](https://twitter.com/${user.username}/status/${tweet.data.id})`
+    )
+    markdown.push(
+      '\n\n' +
+        `[Thread by @${user.username} on Thread Reader App – Thread Reader App](https://threadreaderapp.com/thread/${tweet.data.id}.html)`
     )
   }
 
