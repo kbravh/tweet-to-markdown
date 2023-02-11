@@ -24,7 +24,13 @@
   </p>
 </p>
 
+## Heads up! ⚠️
+Twitter will remove free access to the Twitter API on Feb. 13th, 2023. At that time, the only way you'll be able to use this tool is if you sign up and pay for a Twitter bearer token (basic access is listed at $100 per month).
+
+I will no longer be continuing development on this tool.
+
 <!-- ABOUT THE PROJECT -->
+
 
 ## About The Project
 
@@ -58,14 +64,7 @@ npx tweet-to-markdown
 
 ## Setup
 
-To use this tool, you have two options:
-- Sign up for a free API key from https://ttm.kbravh.dev (new in v2.0.0)
-- Sign up for a bearer token through the Twitter Developer dashboard
-
-Getting a free API key from https://ttm.kbravh.dev is the easiest method of using this plugin, as you won't have to go through Twitter's developer application process. Their application is tedious, and they don't always approve requests. However, you are more than welcome to follow the guide below to retrieve your own bearer token from Twitter. This will give you the most control, freedom, and security over your usage.
-
-### Free TTM API key
-You can sign up for a free API key at https://ttm.kbravh.dev by signing in with either your GitHub or Twitter account and heading to your account page. Once you sign in and retrieve your API key from your account page, either store it in the environment variable `TTM_API_KEY` or pass it to the command line tool with the `-b` (`--bearer`) flag with each call.
+To use this tool, you must sign up for a bearer token through the Twitter Developer dashboard. Twitter is ending free access to their API on Feb. 13th, 2023. Basic access is listed at $100 per month.
 
 ### Twitter Developer bearer token
 To get a bearer token from Twitter, you'll need to set up an application on the [Twitter developer dashboard](https://developer.twitter.com/en/portal/dashboard). For a guide on doing so, see [Getting a bearer token](https://github.com/kbravh/obsidian-tweet-to-markdown/blob/main/BearerTokenGuide.md). Once you have the bearer token, either store it in the environment variable `TWITTER_BEARER_TOKEN` or pass it to the command line tool with the `-b` (`--bearer`) flag with each call.
