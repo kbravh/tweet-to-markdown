@@ -560,18 +560,13 @@ export const buildMarkdown = async (
     }
   }
 
-  // indent all lines for a quoted tweet
-  if (type === 'quoted') {
-    markdown = markdown.map(line => '> ' + line)
-  }
-
   // add original tweet link to end of tweet if not a condensed thread
   if (
     !(options.condensedThread || options.semicondensedThread) &&
     !options.textOnly
   ) {
+    markdown.push('')
     markdown.push(
-      '\n\n' +
         `[Tweet link](https://twitter.com/${user.username}/status/${tweet.data.id})`
     )
   }
@@ -582,7 +577,7 @@ export const buildMarkdown = async (
     case 'thread':
       return markdown.join('\n')
     case 'quoted':
-      return '\n\n' + markdown.join('\n')
+      return '\n\n> ' + markdown.join('\n> ')
     default:
       return '\n\n' + markdown.join('\n')
   }
