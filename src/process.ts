@@ -26,6 +26,15 @@ export const processTweetRequest = async (
 
   try {
     currentTweet = await getTweet(id, options.bearer)
+    // Get the original tweet instead of a retweet staring with RT @username
+    if (currentTweet.data && currentTweet.data.referenced_tweets) {
+      for (const tweet_ref of currentTweet.data.referenced_tweets) {
+        if (tweet_ref && tweet_ref.type === 'retweeted') {
+          currentTweet = await getTweet(tweet_ref.id, options.bearer)
+          process.stdout.write(`Retweeted tweets downloaded: ${tweets.length}\r`)
+        }
+      }
+    }
   } catch (err) {
     error = err
   }
