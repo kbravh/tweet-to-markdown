@@ -75,6 +75,8 @@ To use this tool, you have ~~two~~ options:
 
 ### Twitter Developer bearer token
 
+Nota bene: You need at least a **Basic** plan in order to look up tweets. The **Free** plan is not sufficient.
+
 To get a bearer token from Twitter, you'll need to set up an application on the [Twitter developer dashboard](https://developer.twitter.com/en/portal/dashboard). For a guide on doing so, see [Getting a bearer token](https://github.com/kbravh/obsidian-tweet-to-markdown/blob/main/BearerTokenGuide.md). Once you have the bearer token, either store it in the environment variable `TWITTER_BEARER_TOKEN` or pass it to the command line tool with the `-b` (`--bearer`) flag with each call.
 
 ## Usage
